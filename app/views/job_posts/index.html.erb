@@ -1,0 +1,155 @@
+<% content_for :head do %>
+  <%= stylesheet_link_tag "job_posts", "data-turbo-track": "reload" %>
+<% end %>
+
+<div class="job-posts-index">
+  <div class="job-posts-index__header">
+    <h1 class="job-posts-index__title">Job Posts</h1>
+    <%= link_to "Application Board", job_applications_path, class: "job-posts-index__board-link" %>
+  </div>
+
+  <%= form_with url: job_posts_path, method: :get, local: true, class: "job-posts-index__filters" do |f| %>
+    <div class="job-posts-index__filters-row">
+      <div class="job-posts-index__filter">
+        <label for="company" class="job-posts-index__filter-label">Company</label>
+        <input type="text" name="company" id="company" value="<%= params[:company] %>" placeholder="Search by company name..." class="job-posts-index__filter-input" />
+      </div>
+
+      <div class="job-posts-index__filter">
+        <label for="remote" class="job-posts-index__filter-label">Remote</label>
+        <select name="remote" id="remote" class="job-posts-index__filter-select">
+          <option value="" <%= "selected" if params[:remote].blank? %>>All</option>
+          <option value="true" <%= "selected" if params[:remote] == "true" %>>Remote only</option>
+          <option value="false" <%= "selected" if params[:remote] == "false" %>>On-site only</option>
+        </select>
+      </div>
+
+      <div class="job-posts-index__filter">
+        <label for="pay_range" class="job-posts-index__filter-label">Pay Range</label>
+        <select name="pay_range" id="pay_range" class="job-posts-index__filter-select">
+          <option value="" <%= "selected" if params[:pay_range].blank? %>>All pay ranges</option>
+          <option value="_50000" <%= "selected" if params[:pay_range] == "_50000" %>>Under $50k</option>
+          <option value="50000_100000" <%= "selected" if params[:pay_range] == "50000_100000" %>>$50k - $100k</option>
+          <option value="100000_150000" <%= "selected" if params[:pay_range] == "100000_150000" %>>$100k - $150k</option>
+          <option value="150000_200000" <%= "selected" if params[:pay_range] == "150000_200000" %>>$150k - $200k</option>
+          <option value="200000_" <%= "selected" if params[:pay_range] == "200000_" %>>$200k+</option>
+        </select>
+      </div>
+
+      <div class="job-posts-index__filter">
+        <label for="position_type" class="job-posts-index__filter-label">Position Type</label>
+        <select name="position_type" id="position_type" class="job-posts-index__filter-select">
+          <option value="" <%= "selected" if params[:position_type].blank? %>>All</option>
+          <option value="contract" <%= "selected" if params[:position_type] == "contract" %>>Contract only</option>
+          <option value="full_time" <%= "selected" if params[:position_type] == "full_time" %>>Full-time only</option>
+        </select>
+      </div>
+
+      <div class="job-posts-index__filter">
+        <label for="experience_range" class="job-posts-index__filter-label">Experience</label>
+        <select name="experience_range" id="experience_range" class="job-posts-index__filter-select">
+          <option value="" <%= "selected" if params[:experience_range].blank? %>>All experience</option>
+          <option value="_2" <%= "selected" if params[:experience_range] == "_2" %>>Up to 2 years</option>
+          <option value="2_5" <%= "selected" if params[:experience_range] == "2_5" %>>2-5 years</option>
+          <option value="5_8" <%= "selected" if params[:experience_range] == "5_8" %>>5-8 years</option>
+          <option value="8_12" <%= "selected" if params[:experience_range] == "8_12" %>>8-12 years</option>
+          <option value="12_" <%= "selected" if params[:experience_range] == "12_" %>>12+ years</option>
+        </select>
+      </div>
+
+      <div class="job-posts-index__filter job-posts-index__filter--actions">
+        <label class="job-posts-index__filter-label">&nbsp;</label>
+        <button type="submit" class="job-posts-index__filter-submit">Apply Filters</button>
+        <%= link_to "Clear", job_posts_path, class: "job-posts-index__filter-clear" %>
+      </div>
+    </div>
+  <% end %>
+
+  <div class="job-posts-index__grid">
+    <% @job_posts.each do |job_post| %>
+      <%= link_to job_post_path(job_post), class: "job-post-card" do %>
+        <div class="job-post-card__header">
+          <h2 class="job-post-card__title"><%= job_post.title %></h2>
+          <p class="job-post-card__company"><%= job_post.company.name %></p>
+          <% if job_post.website.present? %>
+            <p class="job-post-card__website">
+              <%= truncate(job_post.website, length: 50) %>
+            </p>
+          <% end %>
+        </div>
+
+        <% if job_post.description.present? %>
+          <div class="job-post-card__description">
+            <%= truncate(strip_tags(job_post.description), length: 180) %>
+          </div>
+        <% end %>
+
+        <% if job_post.extract_pay_range.present? %>
+          <p class="job-post-card__pay-range"><%= job_post.extract_pay_range %></p>
+        <% end %>
+        <% if job_post.extract_experience_requirement.present? %>
+          <p class="job-post-card__experience"><%= job_post.extract_experience_requirement %> experience</p>
+        <% end %>
+
+        <div class="job-post-card__footer">
+          <div class="job-post-card__badges">
+            <% if @applied_job_post_ids&.include?(job_post.id) %>
+              <span class="job-post-card__badge job-post-card__badge--applied">Applied</span>
+            <% end %>
+            <% if job_post.remote %>
+              <span class="job-post-card__badge job-post-card__badge--remote">Remote</span>
+            <% end %>
+            <% if job_post.contract? %>
+              <span class="job-post-card__badge job-post-card__badge--contract">Contract</span>
+            <% end %>
+            <% if job_post.location.present? %>
+              <span class="job-post-card__badge job-post-card__badge--location"><%= job_post.location %></span>
+            <% end %>
+          </div>
+          <span class="job-post-card__cta">View details →</span>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
+
+  <% total_count = @job_posts.respond_to?(:total_count) ? @job_posts.total_count : @job_posts.size %>
+  <% offset = @job_posts.respond_to?(:offset_value) ? @job_posts.offset_value.to_i : 0 %>
+  <% per_page_options = [10, 20, 50] %>
+  <% selected_per_page = per_page_options.include?(params[:per_page].to_i) ? params[:per_page].to_i : 10 %>
+  <% start_number = total_count.to_i.positive? ? (offset + 1) : 0 %>
+  <% end_number = total_count.to_i.positive? ? [offset + @job_posts.length, total_count].min : 0 %>
+
+  <div class="job-posts-index__bottom">
+    <% if @job_posts.respond_to?(:total_pages) && @job_posts.total_pages > 1 %>
+      <div class="job-posts-index__pagination">
+        <%= paginate @job_posts, params: params.permit(:company, :remote, :pay_range, :position_type, :experience_range, :per_page).to_h %>
+      </div>
+    <% end %>
+
+    <div class="job-posts-index__results-meta">
+      <% if total_count.to_i.positive? %>
+        <p class="job-posts-index__results-count">
+          Showing <%= start_number %>-<%= end_number %> of <%= total_count %> jobs
+        </p>
+      <% else %>
+        <p class="job-posts-index__results-count">No job posts found.</p>
+      <% end %>
+
+      <%= form_with url: job_posts_path, method: :get, local: true, class: "job-posts-index__per-page-form" do %>
+        <% params.permit(:company, :remote, :pay_range, :position_type, :experience_range).each do |k, v| %>
+          <%= hidden_field_tag k, v %>
+        <% end %>
+        <%= hidden_field_tag :page, 1 %>
+        <div class="job-posts-index__per-page">
+          <label for="per_page">Posts per page</label>
+          <%= select_tag :per_page, options_for_select(per_page_options, selected_per_page), onchange: "this.form.submit();" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="job-posts-index__manual-create">
+    <p>Can't find the posting you want to track?</p>
+    <%= link_to "Create a Job Post Manually", new_job_post_path, class: "job-posts-index__manual-create-link" %>
+  </div>
+</div>

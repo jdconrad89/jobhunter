@@ -1,0 +1,166 @@
+<% content_for :head do %>
+  <%= stylesheet_link_tag "job_posts", "data-turbo-track": "reload" %>
+<% end %>
+
+<div class="job-post-show">
+  <div class="job-post-show__container">
+    <div class="job-post-show__card">
+      <!-- Website & Apply at top -->
+      <div class="job-post-show__apply-bar">
+        <%= link_to @job_post.website, target: "_blank", rel: "noopener noreferrer", class: "job-post-show__website-link" do %>
+          <svg class="job-post-show__external-icon" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+          </svg>
+          <%= truncate(@job_post.website, length: 60) %>
+        <% end %>
+        <%= link_to @job_post.website, target: "_blank", rel: "noopener noreferrer", class: "job-post-show__apply-btn" do %>
+          Apply Now
+          <svg class="job-post-show__arrow-icon" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+          </svg>
+        <% end %>
+
+        <% if @job_application.present? %>
+          <span class="job-post-show__applied-label">Applied</span>
+        <% else %>
+          <%= button_to job_post_job_applications_path(@job_post), method: :post, class: "job-post-show__apply-track-btn" do %>
+            Mark as Applied
+          <% end %>
+        <% end %>
+      </div>
+
+      <!-- Header -->
+      <header class="job-post-show__header">
+        <h1 class="job-post-show__title"><%= @job_post.title %></h1>
+        <p class="job-post-show__company"><%= @job_post.company.name %></p>
+        <div class="job-post-show__meta">
+          <% if @job_post.remote %>
+            <span class="job-post-show__badge job-post-show__badge--remote">Remote</span>
+          <% end %>
+          <% if @job_post.location.present? %>
+            <span class="job-post-show__badge job-post-show__badge--location"><%= @job_post.location %></span>
+          <% end %>
+          <% if @job_post.posted_at.present? %>
+            <span class="job-post-show__posted">Posted <%= @job_post.posted_at.strftime("%B %d, %Y") %></span>
+          <% end %>
+        </div>
+      </header>
+
+      <!-- Job details sidebar -->
+      <div class="job-post-show__content">
+        <aside class="job-post-show__sidebar">
+          <div class="job-post-show__detail-block">
+            <h3 class="job-post-show__detail-title">Details</h3>
+            <dl class="job-post-show__detail-list">
+              <div class="job-post-show__detail-row">
+                <dt>Company</dt>
+                <dd><%= @job_post.company.name %></dd>
+              </div>
+              <div class="job-post-show__detail-row">
+                <dt>Location</dt>
+                <dd><%= @job_post.location.presence || "—" %></dd>
+              </div>
+              <div class="job-post-show__detail-row">
+                <dt>Remote</dt>
+                <dd><%= @job_post.remote ? "Yes" : "No" %></dd>
+              </div>
+              <% if @job_post.extract_pay_range.present? %>
+                <div class="job-post-show__detail-row">
+                  <dt>Pay Range</dt>
+                  <dd class="job-post-show__pay-range"><%= @job_post.extract_pay_range %></dd>
+                </div>
+              <% end %>
+              <% if @job_post.extract_experience_requirement.present? %>
+                <div class="job-post-show__detail-row">
+                  <dt>Experience</dt>
+                  <dd class="job-post-show__experience"><%= @job_post.extract_experience_requirement %></dd>
+                </div>
+              <% end %>
+              <% if @job_post.posted_at.present? %>
+                <div class="job-post-show__detail-row">
+                  <dt>Posted</dt>
+                  <dd><%= @job_post.posted_at.strftime("%B %d, %Y") %></dd>
+                </div>
+              <% end %>
+            </dl>
+          </div>
+
+          <% if @suggested_job_posts.present? %>
+            <div class="job-post-show__suggested-block">
+              <h3 class="job-post-show__detail-title">Suggested Jobs</h3>
+
+              <div class="job-post-show__suggested-list">
+                <% @suggested_job_posts.each do |suggested_job, _score, overlap| %>
+                  <article class="job-post-show__suggested-card">
+                    <h4 class="job-post-show__suggested-title">
+                      <%= link_to suggested_job.title, job_post_path(suggested_job), class: "job-post-show__suggested-title-link" %>
+                    </h4>
+
+                    <dl class="job-post-show__suggested-details">
+                      <div>
+                        <dt>Company</dt>
+                        <dd><%= suggested_job.company.name %></dd>
+                      </div>
+                      <div>
+                        <dt>Location</dt>
+                        <dd><%= suggested_job.location.presence || "—" %></dd>
+                      </div>
+                      <div>
+                        <dt>Remote</dt>
+                        <dd><%= suggested_job.remote ? "Yes" : "No" %></dd>
+                      </div>
+                      <% if suggested_job.extract_pay_range.present? %>
+                        <div>
+                          <dt>Pay</dt>
+                          <dd><%= suggested_job.extract_pay_range %></dd>
+                        </div>
+                      <% end %>
+                      <% if suggested_job.extract_experience_requirement.present? %>
+                        <div>
+                          <dt>Experience</dt>
+                          <dd><%= suggested_job.extract_experience_requirement %></dd>
+                        </div>
+                      <% end %>
+                    </dl>
+
+                    <p class="job-post-show__suggested-match">
+                      Match: <%= overlap.join(", ") %>
+                    </p>
+
+                    <%= link_to "View job", job_post_path(suggested_job), class: "job-post-show__suggested-link" %>
+                  </article>
+                <% end %>
+              </div>
+            </div>
+          <% end %>
+        </aside>
+
+        <!-- Description -->
+        <main class="job-post-show__main">
+          <div class="job-post-show__description">
+            <h3 class="job-post-show__description-title">Job Description</h3>
+            <div class="job-post-show__description-body">
+              <%= raw @job_post.description_with_highlighted_pay %>
+            </div>
+          </div>
+        </main>
+      </div>
+
+      <!-- Footer actions -->
+      <footer class="job-post-show__footer">
+        <%= link_to job_posts_path, class: "job-post-show__back-link" do %>
+          <svg class="job-post-show__back-icon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          Back to Jobs
+        <% end %>
+        <%= link_to @job_post.website, target: "_blank", rel: "noopener noreferrer", class: "job-post-show__apply-btn job-post-show__apply-btn--footer" do %>
+          Apply Now
+          <svg class="job-post-show__arrow-icon" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+          </svg>
+        <% end %>
+      </footer>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,244 @@
+.job-apps-board {
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+}
+
+.job-apps-board__header {
+  margin-bottom: 1.25rem;
+}
+
+.job-apps-board__title {
+  margin: 0;
+  font-size: 1.8rem;
+  color: #1f2937;
+}
+
+.job-apps-board__subtitle {
+  margin: 0.25rem 0 0;
+  color: #64748b;
+}
+
+.job-apps-board__columns {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(240px, 1fr));
+  gap: 1rem;
+}
+
+@media (max-width: 1100px) {
+  .job-apps-board__columns {
+    grid-template-columns: repeat(2, minmax(240px, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .job-apps-board__columns {
+    grid-template-columns: 1fr;
+  }
+}
+
+.job-apps-column {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 0.75rem;
+}
+
+.job-apps-column__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.job-apps-column__header h2 {
+  margin: 0;
+  font-size: 1rem;
+  color: #0f172a;
+}
+
+.job-apps-column__count {
+  font-size: 0.8rem;
+  color: #475569;
+  background: #e2e8f0;
+  border-radius: 999px;
+  padding: 0.15rem 0.55rem;
+}
+
+.job-apps-column__dropzone {
+  min-height: 250px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.job-apps-column__dropzone--over {
+  outline: 2px dashed #0d9488;
+  outline-offset: 4px;
+  border-radius: 8px;
+}
+
+.job-app-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 0.75rem;
+  cursor: grab;
+}
+
+.job-app-card--dragging {
+  opacity: 0.6;
+}
+
+.job-app-card__title {
+  margin: 0 0 0.5rem;
+  font-size: 0.95rem;
+  line-height: 1.3;
+}
+
+.job-app-card__title a {
+  color: #1e293b;
+  text-decoration: none;
+}
+
+.job-app-card__title a:hover {
+  color: #0d9488;
+  text-decoration: underline;
+}
+
+.job-app-card__details {
+  margin: 0;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.job-app-card__details dt {
+  font-size: 0.72rem;
+  color: #64748b;
+}
+
+.job-app-card__details dd {
+  margin: 0;
+  font-size: 0.82rem;
+  color: #1f2937;
+}
+
+.job-app-card__actions {
+  margin-top: 0.5rem;
+  display: flex;
+  gap: 0.75rem;
+}
+
+.job-app-card__link {
+  color: #1d4ed8;
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.job-app-card__link:hover {
+  text-decoration: underline;
+}
+
+.job-app-card__followup {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  user-select: none;
+}
+
+.job-app-card__followup-checkbox {
+  width: 16px;
+  height: 16px;
+}
+
+.job-app-show {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+}
+
+.job-app-show__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.job-app-show__title {
+  margin: 0;
+  font-size: 1.6rem;
+  color: #0f172a;
+}
+
+.job-app-show__subtitle {
+  margin: 0.25rem 0 0;
+  color: #64748b;
+}
+
+.job-app-show__header-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.job-app-show__card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.25rem;
+}
+
+.job-app-show__grid {
+  display: grid;
+  grid-template-columns: 1fr 180px;
+  gap: 1rem;
+  align-items: end;
+}
+
+@media (max-width: 700px) {
+  .job-app-show__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.job-app-show__field label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 0.35rem;
+}
+
+.job-app-show__field--checkbox label {
+  margin-bottom: 0.5rem;
+}
+
+.job-app-show__field--checkbox input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+}
+
+.job-app-show__field--full {
+  grid-column: 1 / -1;
+}
+
+.job-app-show__select,
+.job-app-show__textarea {
+  width: 100%;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 0.65rem 0.75rem;
+  font-size: 0.95rem;
+}
+
+.job-app-show__textarea {
+  resize: vertical;
+}
+
+.job-app-show__actions {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: flex-end;
+}

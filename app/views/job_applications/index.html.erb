@@ -1,0 +1,159 @@
+<% content_for :head do %>
+  <%= stylesheet_link_tag "job_applications", "data-turbo-track": "reload" %>
+<% end %>
+
+<div class="job-apps-board">
+  <div class="job-apps-board__header">
+    <h1 class="job-apps-board__title">Application Tracker</h1>
+    <p class="job-apps-board__subtitle">Drag cards between columns to update status.</p>
+  </div>
+
+  <div class="job-apps-board__columns">
+    <% JobApplicationsController::STATUSES.each do |status| %>
+      <section class="job-apps-column" data-status="<%= status %>">
+        <header class="job-apps-column__header">
+          <h2><%= status.humanize %></h2>
+          <span class="job-apps-column__count"><%= (@job_applications_by_status[status] || []).size %></span>
+        </header>
+
+        <div class="job-apps-column__dropzone" data-status="<%= status %>">
+          <% (@job_applications_by_status[status] || []).each do |application| %>
+            <% job = application.job_post %>
+            <article class="job-app-card" draggable="true" data-application-id="<%= application.id %>">
+              <h3 class="job-app-card__title">
+                <%= link_to job.title, job_post_path(job) %>
+              </h3>
+
+              <dl class="job-app-card__details">
+                <div><dt>Company</dt><dd><%= job.company.name %></dd></div>
+                <div><dt>Location</dt><dd><%= job.location.presence || "—" %></dd></div>
+                <div><dt>Remote</dt><dd><%= job.remote ? "Yes" : "No" %></dd></div>
+                <div>
+                  <dt>Followed up</dt>
+                  <dd>
+                    <label class="job-app-card__followup">
+                      <input
+                        type="checkbox"
+                        class="job-app-card__followup-checkbox"
+                        data-followup-checkbox="true"
+                        data-application-id="<%= application.id %>"
+                        <%= "checked" if application.followed_up %>
+                      />
+                      <span><%= application.followed_up ? "Yes" : "No" %></span>
+                    </label>
+                  </dd>
+                </div>
+                <% if job.extract_pay_range.present? %>
+                  <div><dt>Pay</dt><dd><%= job.extract_pay_range %></dd></div>
+                <% end %>
+                <% if job.extract_experience_requirement.present? %>
+                  <div><dt>Experience</dt><dd><%= job.extract_experience_requirement %></dd></div>
+                <% end %>
+              </dl>
+
+              <div class="job-app-card__actions">
+                <%= link_to "View job", job_post_path(job), class: "job-app-card__link" %>
+                <%= link_to "Details", job_application_path(application), class: "job-app-card__link" %>
+              </div>
+            </article>
+          <% end %>
+        </div>
+      </section>
+    <% end %>
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute("content");
+    let draggedCard = null;
+
+    document.querySelectorAll(".job-app-card").forEach((card) => {
+      card.addEventListener("dragstart", () => {
+        if (card.dataset.dragDisabled === "true") return;
+        draggedCard = card;
+        card.classList.add("job-app-card--dragging");
+      });
+      card.addEventListener("dragend", () => {
+        card.classList.remove("job-app-card--dragging");
+      });
+    });
+
+    document.querySelectorAll('[data-followup-checkbox="true"]').forEach((checkbox) => {
+      checkbox.addEventListener("pointerdown", (e) => {
+        e.stopPropagation();
+        const card = checkbox.closest(".job-app-card");
+        if (card) card.dataset.dragDisabled = "true";
+      });
+
+      checkbox.addEventListener("pointerup", () => {
+        const card = checkbox.closest(".job-app-card");
+        if (card) card.dataset.dragDisabled = "false";
+      });
+
+      checkbox.addEventListener("change", async (e) => {
+        e.stopPropagation();
+        const applicationId = checkbox.dataset.applicationId;
+        const followedUp = checkbox.checked;
+
+        try {
+          const response = await fetch(`/job_applications/${applicationId}`, {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+              "X-CSRF-Token": token,
+              "Accept": "application/json"
+            },
+            body: JSON.stringify({ job_application: { followed_up: followedUp } })
+          });
+
+          if (!response.ok) throw new Error("Failed to update followed_up");
+
+          const labelSpan = checkbox.closest("label")?.querySelector("span");
+          if (labelSpan) labelSpan.textContent = followedUp ? "Yes" : "No";
+        } catch (err) {
+          checkbox.checked = !followedUp;
+          alert("Could not update followed up state.");
+        }
+      });
+    });
+
+    document.querySelectorAll(".job-apps-column__dropzone").forEach((zone) => {
+      zone.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        zone.classList.add("job-apps-column__dropzone--over");
+      });
+
+      zone.addEventListener("dragleave", () => {
+        zone.classList.remove("job-apps-column__dropzone--over");
+      });
+
+      zone.addEventListener("drop", async (e) => {
+        e.preventDefault();
+        zone.classList.remove("job-apps-column__dropzone--over");
+        if (!draggedCard) return;
+
+        const newStatus = zone.dataset.status;
+        const applicationId = draggedCard.dataset.applicationId;
+
+        try {
+          const response = await fetch(`/job_applications/${applicationId}`, {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+              "X-CSRF-Token": token,
+              "Accept": "application/json"
+            },
+            body: JSON.stringify({ status: newStatus })
+          });
+
+          if (!response.ok) throw new Error("Failed to update status");
+          zone.appendChild(draggedCard);
+          window.location.reload();
+        } catch (err) {
+          alert("Could not update application status.");
+        }
+      });
+    });
+  });
+</script>

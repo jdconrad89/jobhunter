@@ -1,0 +1,33 @@
+{
+  "name": "jobhunter",
+  "private": true,
+  "dependencies": {
+    "@babel/core": "^7.27.4",
+    "@babel/plugin-proposal-class-properties": "^7.18.6",
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
+    "@babel/preset-env": "^7.23.9",
+    "@babel/preset-react": "^7.23.3",
+    "@rails/actioncable": "^7.1.3",
+    "@rails/activestorage": "^7.1.3",
+    "@rails/ujs": "^7.1.3",
+    "@rails/webpacker": "5.4.4",
+    "@tailwindcss/typography": "^0.5.16",
+    "autoprefixer": "^10.4.21",
+    "babel-loader": "^8.3.0",
+    "postcss": "^8.5.5",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react_ujs": "^3.2.1",
+    "tailwindcss": "^4.1.10",
+    "turbolinks": "^5.2.0",
+    "webpack": "5"
+  },
+  "scripts": {
+    "dev": "concurrently \"bin/webpack-dev-server\" \"bin/rails server\""
+  },
+  "devDependencies": {
+    "@babel/plugin-proposal-private-methods": "^7.18.6",
+    "concurrently": "^8.2.2",
+    "webpack-dev-server": "^3.11.3"
+  }
+}

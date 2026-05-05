@@ -1,0 +1,62 @@
+<% content_for :head do %>
+  <%= stylesheet_link_tag "job_posts", "data-turbo-track": "reload" %>
+<% end %>
+
+<div class="job-posts-new">
+  <div class="job-posts-new__container">
+    <div class="job-posts-new__header">
+      <h1>Create Job Post</h1>
+      <p>Add a job posting manually with all details.</p>
+    </div>
+
+    <% if @job_post.errors.any? %>
+      <div class="job-posts-new__errors">
+        <h2><%= pluralize(@job_post.errors.count, "error") %> prevented saving:</h2>
+        <ul>
+          <% @job_post.errors.full_messages.each do |message| %>
+            <li><%= message %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <%= form_with model: @job_post, url: job_posts_path, method: :post, local: true, class: "job-posts-new__form" do |f| %>
+      <div class="job-posts-new__grid">
+        <div class="job-posts-new__field">
+          <%= f.label :title %>
+          <%= f.text_field :title, required: true %>
+        </div>
+
+        <div class="job-posts-new__field">
+          <%= label_tag "job_post_company_name", "Company Name" %>
+          <%= text_field_tag "job_post[company_name]", params.dig(:job_post, :company_name), required: true %>
+        </div>
+
+        <div class="job-posts-new__field">
+          <%= f.label :website, "Job URL" %>
+          <%= f.url_field :website, required: true %>
+        </div>
+
+        <div class="job-posts-new__field">
+          <%= f.label :location %>
+          <%= f.text_field :location %>
+        </div>
+
+        <div class="job-posts-new__field job-posts-new__field--checkbox">
+          <%= f.check_box :remote %>
+          <%= f.label :remote, "Remote position" %>
+        </div>
+      </div>
+
+      <div class="job-posts-new__field">
+        <%= f.label :description %>
+        <%= f.text_area :description, rows: 12 %>
+      </div>
+
+      <div class="job-posts-new__actions">
+        <%= link_to "Cancel", job_posts_path, class: "job-posts-new__cancel" %>
+        <%= f.submit "Create Job Post", class: "job-posts-new__submit" %>
+      </div>
+    <% end %>
+  </div>
+</div>

@@ -1,0 +1,64 @@
+.applications-section {
+  margin-top: 2rem;
+  padding: 1rem;
+}
+
+.applications-section h2 {
+  margin-bottom: 1.5rem;
+  color: #2c3e50;
+}
+
+.applications-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.application-card {
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+}
+
+.application-card .card-header {
+  margin-bottom: 1rem;
+}
+
+.application-card h3 {
+  margin: 0 0 0.5rem 0;
+  color: #2c3e50;
+  font-size: 1.2rem;
+}
+
+.application-card .company {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.application-card .card-details {
+  margin-bottom: 1.5rem;
+}
+
+.application-card .card-details p {
+  margin: 0.5rem 0;
+  color: #666;
+}
+
+.application-card .card-details strong {
+  color: #2c3e50;
+}
+
+.application-card .card-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.no-applications {
+  text-align: center;
+  color: #666;
+  font-style: italic;
+  padding: 2rem;
+  background-color: #f8f9fa;
+  border-radius: 0.5rem;
+} 

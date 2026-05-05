@@ -1,0 +1,69 @@
+<div class="dashboard-container">
+  <div class="dashboard-header">
+    <h1>Your Job Searches</h1>
+    <%= link_to "New Job Search", new_job_search_path, class: "button-primary" %>
+  </div>
+
+  <div class="job-searches-grid">
+    <% @job_searches.each do |job_search| %>
+      <div class="job-search-card">
+        <div class="card-header">
+          <h3><%= job_search.job_title %></h3>
+          <span class="location"><%= job_search.location %></span>
+        </div>
+
+        <div class="card-details">
+          <p><strong>Remote:</strong> <%= job_search.remote ? "Yes" : "No" %></p>
+          <p><strong>Language:</strong> <%= job_search.language_code %></p>
+          <p><strong>Run Time:</strong> <%= job_search.runtime&.strftime("%I:%M %p") %></p>
+          <p><strong>Timezone:</strong> <%= job_search.timezone %></p>
+        </div>
+
+        <div class="card-actions">
+          <%= button_to "Trigger Search", 
+              trigger_job_search_path(job_search), 
+              method: :post,
+              class: "button-secondary",
+              data: { turbo_confirm: "Are you sure you want to trigger this job search now?" } %>
+          
+          <%= link_to "Edit", edit_job_search_path(job_search), class: "button-link" %>
+          <%= button_to "Delete", 
+              job_search_path(job_search), 
+              method: :delete,
+              class: "button-danger",
+              data: { turbo_confirm: "Are you sure you want to delete this job search?" } %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="applications-section">
+    <h2>Your Job Applications</h2>
+    <% if @job_applications.any? %>
+      <div class="applications-grid">
+        <% @job_applications.each do |application| %>
+          <div class="application-card">
+            <div class="card-header">
+              <h3><%= application.job_post.title %></h3>
+              <span class="company"><%= application.job_post.company.name %></span>
+            </div>
+
+            <div class="card-details">
+              <p><strong>Status:</strong> <%= application.status.titleize %></p>
+              <p><strong>Applied:</strong> <%= application.created_at.strftime("%B %d, %Y") %></p>
+              <p><strong>Location:</strong> <%= application.job_post.location %></p>
+              <p><strong>Remote:</strong> <%= application.job_post.remote ? "Yes" : "No" %></p>
+            </div>
+
+            <div class="card-actions">
+              <%= link_to "View Details", job_application_path(application), class: "button-link" %>
+              <%= link_to "Update Status", edit_job_application_path(application), class: "button-secondary" %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <p class="no-applications">You haven't applied to any jobs yet.</p>
+    <% end %>
+  </div>
+</div> 

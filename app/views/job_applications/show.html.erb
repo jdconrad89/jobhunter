@@ -1,0 +1,43 @@
+<% content_for :head do %>
+  <%= stylesheet_link_tag "job_applications", "data-turbo-track": "reload" %>
+<% end %>
+
+<div class="job-app-show">
+  <div class="job-app-show__header">
+    <div>
+      <h1 class="job-app-show__title"><%= @job_application.job_post.title %></h1>
+      <p class="job-app-show__subtitle"><%= @job_application.job_post.company.name %></p>
+    </div>
+
+    <div class="job-app-show__header-actions">
+      <%= link_to "Back to Board", job_applications_path, class: "button-secondary" %>
+      <%= link_to "View Job", job_post_path(@job_application.job_post), class: "button-link" %>
+    </div>
+  </div>
+
+  <div class="job-app-show__card">
+    <%= form_with model: @job_application, url: job_application_path(@job_application), method: :patch do |f| %>
+      <div class="job-app-show__grid">
+        <div class="job-app-show__field">
+          <%= f.label :status %>
+          <%= f.select :status, JobApplicationsController::STATUSES.map { |s| [s.humanize, s] }, {}, class: "job-app-show__select" %>
+        </div>
+
+        <div class="job-app-show__field job-app-show__field--checkbox">
+          <%= f.label :followed_up, "Followed up" %>
+          <%= f.check_box :followed_up %>
+        </div>
+
+        <div class="job-app-show__field job-app-show__field--full">
+          <%= f.label :contact_info, "Contact info (emails, notes, etc.)" %>
+          <%= f.text_area :contact_info, rows: 4, placeholder: "e.g. recruiter@company.com, hiring.manager@company.com", class: "job-app-show__textarea" %>
+        </div>
+      </div>
+
+      <div class="job-app-show__actions">
+        <%= f.submit "Save", class: "button-primary" %>
+      </div>
+    <% end %>
+  </div>
+</div>
+
