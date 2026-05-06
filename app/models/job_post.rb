@@ -32,8 +32,8 @@ class JobPost < ApplicationRecord
     scope
   }
 
-  def self.filtered(params)
-    JobPosts::Filter.call(params)
+  def self.filtered(filter_params)
+    JobPosts::Filter.call(filter_params)
   end
 
   def update_job_search_jobs_count

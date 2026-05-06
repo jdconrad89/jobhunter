@@ -3,7 +3,7 @@ class JobPostsController < ApplicationController
   before_action :set_job_post, only: [ :show ]
 
   def index
-    @job_posts = JobPost.filtered(params)
+    @job_posts = JobPost.filtered(job_post_filter_params)
       .page(params[:page])
       .per(job_posts_per_page)
     @applied_job_post_ids = current_user.job_applications.where(job_post_id: @job_posts.map(&:id)).pluck(:job_post_id)
@@ -53,6 +53,10 @@ class JobPostsController < ApplicationController
 
   def set_job_post
     @job_post = JobPost.find(params[:id])
+  end
+
+  def job_post_filter_params
+    params.permit(:company, :remote, :position_type, :pay_range, :experience_range)
   end
 
   def job_post_params

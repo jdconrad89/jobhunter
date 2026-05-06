@@ -2,17 +2,13 @@
 
 module JobPosts
   class Filter
-    def self.call(params)
-      new(params).call
+    def self.call(filter_params)
+      new(filter_params).call
     end
 
-    def initialize(params)
-      @params =
-        if params.respond_to?(:to_unsafe_h)
-          params.to_unsafe_h
-        else
-          params.respond_to?(:to_h) ? params.to_h : Hash(params)
-        end.with_indifferent_access
+    # filter_params: Hash or permitted ActionController::Parameters (already allowlisted by the controller).
+    def initialize(filter_params)
+      @params = (filter_params&.to_h || {}).with_indifferent_access
     end
 
     def call
@@ -39,14 +35,14 @@ module JobPosts
 
       if @params[:pay_range].present?
         parts = @params[:pay_range].split("_")
-        pay_min = parts[0].presence&.to_i
+        pay_min = parts[0].presence&.to_i if parts[0].present?
         pay_max = parts[1].presence&.to_i if parts[1].present?
         scope = scope.filter_by_pay_range(pay_min, pay_max) if pay_min.present? || pay_max.present?
       end
 
       if @params[:experience_range].present?
         parts = @params[:experience_range].split("_")
-        exp_min = parts[0].presence&.to_i
+        exp_min = parts[0].presence&.to_i if parts[0].present?
         exp_max = parts[1].presence&.to_i if parts[1].present?
         scope = scope.filter_by_experience_range(exp_min, exp_max) if exp_min.present? || exp_max.present?
       end
