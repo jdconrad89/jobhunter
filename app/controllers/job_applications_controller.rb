@@ -2,8 +2,6 @@ class JobApplicationsController < ApplicationController
   before_action :require_login
   before_action :set_job_application, only: [:show, :edit, :update]
 
-  STATUSES = %w[applied interviewing rejected ghosted].freeze
-
   def index
     @job_applications = current_user.job_applications.includes(job_post: :company).order(updated_at: :desc)
     @job_applications_by_status = @job_applications.group_by(&:status)
@@ -23,7 +21,7 @@ class JobApplicationsController < ApplicationController
   end
 
   def update
-    if params[:status].present? && !STATUSES.include?(params[:status])
+    if params[:status].present? && !JobApplication::STATUSES.include?(params[:status])
       return render json: { error: "Invalid status" }, status: :unprocessable_entity
     end
 

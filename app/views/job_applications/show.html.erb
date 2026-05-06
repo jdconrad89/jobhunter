@@ -20,7 +20,7 @@
       <div class="job-app-show__grid">
         <div class="job-app-show__field">
           <%= f.label :status, "Pipeline status" %>
-          <%= f.select :status, JobApplicationsController::STATUSES.map { |s| [s.humanize, s] }, {}, class: "job-app-show__select" %>
+          <%= f.select :status, JobApplication::STATUSES.map { |s| [s.humanize, s] }, {}, class: "job-app-show__select" %>
         </div>
 
         <div class="job-app-show__field job-app-show__field--checkbox">

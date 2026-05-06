@@ -9,7 +9,7 @@
   </div>
 
   <div class="job-apps-board__columns">
-    <% JobApplicationsController::STATUSES.each do |status| %>
+    <% JobApplication::STATUSES.each do |status| %>
       <section class="job-apps-column" data-status="<%= status %>">
         <header class="job-apps-column__header">
           <h2><%= status.humanize %></h2>
