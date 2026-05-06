@@ -8,8 +8,6 @@ class JobScraperJob < ApplicationJob
       return
     end
 
-    Time.zone = job_search.timezone
-
     Rails.logger.info "Starting job search for: #{job_search.job_title} in #{job_search.location}"
 
     begin
