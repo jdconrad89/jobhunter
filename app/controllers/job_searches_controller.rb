@@ -40,7 +40,7 @@ class JobSearchesController < ApplicationController
   end
 
   def trigger
-    JobScraperJob.perform_later(@job_search)
+    JobScraperJob.perform_later(@job_search.id)
     redirect_to dashboard_path, notice: 'Job search has been triggered and will run shortly.'
   end
 

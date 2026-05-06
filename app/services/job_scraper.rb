@@ -1,12 +1,12 @@
 class JobScraper
-  def initialize(job_title:, location: nil, remote: nil, language_code: 'en', board_relevance: [], number_of_jobs: nil)
-    @job_title = job_title
-    @location = location
-    @remote = remote
-    @language_code = language_code
-    @board_relevance = board_relevance
+  def initialize(job_search:)
+    @job_title = job_search.job_title
+    @location = job_search.location
+    @remote = job_search.remote
+    @language_code = job_search.language_code
+    @board_relevance = Array(job_search.board_relevance)
     @job_boards_covered = []
-    @number_of_jobs = number_of_jobs
+    @number_of_jobs = job_search.number_of_jobs
   end
 
   def scrape

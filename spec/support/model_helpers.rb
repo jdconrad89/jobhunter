@@ -25,6 +25,19 @@ module ModelHelpers
     )
   end
 
+  # Lightweight stand-in for unit tests; JobScraper only reads attributes.
+  def stub_job_search_for_job_scraper(job_title: "Ruby", location: nil, remote: nil, language_code: "en", board_relevance: [], number_of_jobs: nil)
+    instance_double(
+      JobSearch,
+      job_title: job_title,
+      location: location,
+      remote: remote,
+      language_code: language_code,
+      board_relevance: board_relevance,
+      number_of_jobs: number_of_jobs
+    )
+  end
+
   def create_job_post!(company:, job_search:, title: "Job", website: "https://example.com/job", description: "desc", location: "Anywhere", remote: true)
     JobPost.create!(
       company: company,

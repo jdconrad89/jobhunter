@@ -17,7 +17,7 @@ RSpec.describe "JobSearches CRUD", type: :request do
 
     expect {
       post trigger_job_search_path(job_search)
-    }.to have_enqueued_job(JobScraperJob)
+    }.to have_enqueued_job(JobScraperJob).with(job_search.id)
     expect(response).to redirect_to(dashboard_path)
 
     delete job_search_path(job_search)

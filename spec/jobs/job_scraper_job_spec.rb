@@ -15,7 +15,7 @@ RSpec.describe JobScraperJob, type: :job do
     scraper = instance_double(JobScraper, scrape: results)
     allow(JobScraper).to receive(:new).and_return(scraper)
 
-    described_class.perform_now(job_search)
+    described_class.perform_now(job_search.id)
 
     expect(Company.where(name: "Acme")).to exist
     expect(Company.where(name: "Beta")).to exist
@@ -31,7 +31,15 @@ RSpec.describe JobScraperJob, type: :job do
     allow(JobScraper).to receive(:new).and_return(scraper)
     allow(scraper).to receive(:scrape).and_raise(StandardError, "boom")
 
-    expect { described_class.perform_now(job_search) }.to raise_error(StandardError, "boom")
+    expect { described_class.perform_now(job_search.id) }.to raise_error(StandardError, "boom")
+  end
+
+  it "skips when JobSearch no longer exists" do
+    allow(JobScraper).to receive(:new)
+
+    described_class.perform_now(0)
+
+    expect(JobScraper).not_to have_received(:new)
   end
 end
 

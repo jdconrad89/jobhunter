@@ -3,7 +3,7 @@ require "rails_helper"
 RSpec.describe JobScraper do
   describe "private helpers" do
     it "builds request params with remote/location and next_page_token" do
-      scraper = described_class.new(job_title: "Ruby", location: "NYC", remote: true, language_code: "en", board_relevance: [])
+      scraper = described_class.new(job_search: stub_job_search_for_job_scraper(location: "NYC", remote: true))
       params = scraper.send(:request_params, next_page_token: "t1")
 
       expect(params[:engine]).to eq("google_jobs")
@@ -15,14 +15,14 @@ RSpec.describe JobScraper do
     end
 
     it "maps remote flag to ltype codes" do
-      scraper = described_class.new(job_title: "Ruby", board_relevance: [])
+      scraper = described_class.new(job_search: stub_job_search_for_job_scraper)
       expect(scraper.send(:get_remote_code, true)).to eq(1)
       expect(scraper.send(:get_remote_code, false)).to eq(0)
       expect(scraper.send(:get_remote_code, nil)).to be_nil
     end
 
     it "parses posted date strings" do
-      scraper = described_class.new(job_title: "Ruby", board_relevance: [])
+      scraper = described_class.new(job_search: stub_job_search_for_job_scraper)
 
       travel_to(Time.utc(2026, 3, 25, 12, 0, 0)) do
         expect(scraper.send(:parse_posted_date, "2 days ago").to_i).to eq(2.days.ago.to_i)
@@ -35,18 +35,18 @@ RSpec.describe JobScraper do
     end
 
     it "returns nil url when no apply options" do
-      scraper = described_class.new(job_title: "Ruby", board_relevance: [])
+      scraper = described_class.new(job_search: stub_job_search_for_job_scraper)
       expect(scraper.send(:get_url, { apply_options: nil })).to be_nil
     end
 
     it "strips utm params from url" do
-      scraper = described_class.new(job_title: "Ruby", board_relevance: [])
+      scraper = described_class.new(job_search: stub_job_search_for_job_scraper)
       result = { apply_options: [{ title: "Direct", link: "https://example.com/apply?utm_source=x&foo=bar&utm_medium=y" }] }
       expect(scraper.send(:get_url, result)).to eq("https://example.com/apply?foo=bar")
     end
 
     it "sorts links by board relevance" do
-      scraper = described_class.new(job_title: "Ruby", board_relevance: ["Indeed", "LinkedIn"])
+      scraper = described_class.new(job_search: stub_job_search_for_job_scraper(board_relevance: ["Indeed", "LinkedIn"]))
       options = [
         { title: "LinkedIn", link: "https://li.example.com" },
         { title: "Indeed", link: "https://in.example.com" }
