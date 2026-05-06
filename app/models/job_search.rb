@@ -13,29 +13,8 @@ class JobSearch < ApplicationRecord
 
   before_validation :set_default_timezone
 
-  def runtime_in_timezone
-    return nil unless runtime && timezone
-    runtime.in_time_zone(timezone)
-  end
-
   def update_number_of_jobs!
     update_column(:number_of_jobs, job_posts.count)
-  end
-
-  def next_run_time
-    return nil unless runtime && timezone
-    now = Time.current.in_time_zone(timezone)
-    today_run = now.change(
-      hour: runtime.hour,
-      min: runtime.min,
-      sec: 0
-    )
-
-    if today_run > now
-      today_run
-    else
-      today_run + 1.day
-    end
   end
 
   private

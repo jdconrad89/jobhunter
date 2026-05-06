@@ -39,40 +39,6 @@ RSpec.describe JobSearch, type: :model do
     expect(job_search.errors[:board_relevance]).to be_present
   end
 
-  it "computes runtime_in_timezone" do
-    user = create_user!(email: "rt@example.com")
-    job_search = JobSearch.create!(
-      user: user,
-      job_title: "Ruby",
-      language_code: "en",
-      timezone: "Pacific Time (US & Canada)",
-      runtime: Time.utc(2026, 3, 25, 12, 0, 0),
-      board_relevance: []
-    )
-
-    expect(job_search.runtime_in_timezone).to be_present
-  end
-
-  it "computes next_run_time based on runtime and timezone" do
-    user = create_user!(email: "nrt@example.com")
-    job_search = JobSearch.create!(
-      user: user,
-      job_title: "Ruby",
-      language_code: "en",
-      timezone: "UTC",
-      runtime: Time.utc(2026, 3, 25, 10, 30, 0),
-      board_relevance: []
-    )
-
-    travel_to(Time.utc(2026, 3, 25, 9, 0, 0)) do
-      expect(job_search.next_run_time).to eq(Time.utc(2026, 3, 25, 10, 30, 0))
-    end
-
-    travel_to(Time.utc(2026, 3, 25, 11, 0, 0)) do
-      expect(job_search.next_run_time).to eq(Time.utc(2026, 3, 26, 10, 30, 0))
-    end
-  end
-
   it "updates number_of_jobs via update_number_of_jobs!" do
     user = create_user!(email: "cnt@example.com")
     job_search = create_job_search!(user: user, number_of_jobs: 0)
