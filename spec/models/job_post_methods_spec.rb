@@ -78,17 +78,17 @@ RSpec.describe JobPost, type: :model do
     end
   end
 
-  describe "#description_with_highlighted_pay" do
+  describe "job_post_description_with_highlighted_pay helper" do
     it "wraps extracted pay range in highlight span" do
       post = make_post(description: "Pay range is $120,000 - $160,000 annually.\nGreat team.")
-      html = post.description_with_highlighted_pay
+      html = ApplicationController.helpers.job_post_description_with_highlighted_pay(post)
       expect(html).to include("pay-range-highlight")
       expect(html).to include("$120,000 - $160,000")
     end
 
     it "returns empty string when description blank" do
       post = make_post(description: "")
-      expect(post.description_with_highlighted_pay).to eq("")
+      expect(ApplicationController.helpers.job_post_description_with_highlighted_pay(post)).to eq("")
     end
   end
 end

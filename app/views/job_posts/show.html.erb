@@ -140,7 +140,7 @@
           <div class="job-post-show__description">
             <h3 class="job-post-show__description-title">Job Description</h3>
             <div class="job-post-show__description-body">
-              <%= raw @job_post.description_with_highlighted_pay %>
+              <%= raw job_post_description_with_highlighted_pay(@job_post) %>
             </div>
           </div>
         </main>
