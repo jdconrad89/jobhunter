@@ -41,5 +41,32 @@ RSpec.describe JobScraperJob, type: :job do
 
     expect(JobScraper).not_to have_received(:new)
   end
+
+  it "rolls back the full import when persistence fails mid-batch" do
+    user = create_user!(email: "jsj_tx@example.com")
+    job_search = create_job_search!(user: user, timezone: "UTC", board_relevance: [], number_of_jobs: 2)
+
+    posted_at = Time.current
+    results = [
+      { title: "First", company_name: "TxCo", url: "https://example.com/tx1", description: "d1", location: "Anywhere", remote: true, posted_at: posted_at },
+      { title: "Second", company_name: "TxCo", url: "https://example.com/tx2", description: "d2", location: "Anywhere", remote: false, posted_at: posted_at }
+    ]
+
+    scraper = instance_double(JobScraper, scrape: results)
+    allow(JobScraper).to receive(:new).and_return(scraper)
+
+    calls = 0
+    allow(JobPost).to receive(:find_or_create_by!).and_wrap_original do |method, *args, **kwargs, &block|
+      calls += 1
+      raise StandardError, "simulated failure" if calls > 1
+
+      method.call(*args, **kwargs, &block)
+    end
+
+    expect { described_class.perform_now(job_search.id) }.to raise_error(StandardError, "simulated failure")
+
+    expect(JobPost.where(job_search: job_search).count).to eq(0)
+    expect(Company.where(name: "TxCo")).not_to exist
+  end
 end
 

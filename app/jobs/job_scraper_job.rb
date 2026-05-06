@@ -15,7 +15,22 @@ class JobScraperJob < ApplicationJob
     begin
       scraper = JobScraper.new(job_search: job_search)
       results = scraper.scrape
+      import_scrape_results!(job_search, results)
 
+      Rails.logger.info "Successfully completed job search for: #{job_search.job_title}"
+    rescue StandardError => e
+      Rails.logger.error "Error during job search for #{job_search.job_title}: #{e.message}"
+      Rails.logger.error e.backtrace.join("\n")
+
+      raise
+    end
+  end
+
+  private
+
+  # One transaction per scrape so a failure mid-import does not leave partial companies/posts.
+  def import_scrape_results!(job_search, results)
+    ActiveRecord::Base.transaction do
       results.each do |job_data|
         next if job_data[:company_name].blank? || job_data[:url].blank?
 
@@ -35,13 +50,6 @@ class JobScraperJob < ApplicationJob
           post.posted_at = job_data[:posted_at]
         end
       end
-
-      Rails.logger.info "Successfully completed job search for: #{job_search.job_title}"
-    rescue StandardError => e
-      Rails.logger.error "Error during job search for #{job_search.job_title}: #{e.message}"
-      Rails.logger.error e.backtrace.join("\n")
-
-      raise
     end
   end
 end
