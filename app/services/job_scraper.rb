@@ -5,7 +5,6 @@ class JobScraper
     @remote = job_search.remote
     @language_code = job_search.language_code
     @board_relevance = Array(job_search.board_relevance)
-    @number_of_jobs = job_search.number_of_jobs
   end
 
   def scrape
@@ -15,15 +14,16 @@ class JobScraper
 
     Rails.logger.info "Starting to scrape jobs for: #{@job_title}"
 
-    target_count = @number_of_jobs.to_i.positive? ? @number_of_jobs : 100
-    while response.length < target_count
+    # TODO: Add logic to have a return number of jobs preference on job search separate from the 
+    # existing number_of_jobs field that tracks number of jobs a search has found
+    while response.length < 100
       current_response = serpapi_response(next_page_token: next_page_token)
       break if current_response[:jobs_results].nil?
 
       total_number_of_jobs += current_response[:jobs_results].length
 
       current_response[:jobs_results].each do |result|
-        break if response.length >= target_count
+        break if response.length >= 100
 
         unless response.any? { |job| job[:title] == result[:title] && job[:company_name] == result[:company_name] }
           response << {
