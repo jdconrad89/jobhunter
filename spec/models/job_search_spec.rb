@@ -18,15 +18,23 @@ RSpec.describe JobSearch, type: :model do
     expect(job_search.errors[:language_code]).to be_present
   end
 
-  it "validates board_relevance is array of URLs" do
+  it "validates board_relevance entries are non-blank job board names" do
     user = create_user!(email: "br@example.com")
     job_search = JobSearch.new(
       user: user,
       job_title: "Ruby",
       language_code: "en",
       timezone: "UTC",
-      board_relevance: ["https://example.com", "notaurl"]
+      board_relevance: ["Indeed", "LinkedIn"]
     )
+    expect(job_search).to be_valid
+
+    long = "a" * (JobSearch::BOARD_RELEVANCE_ENTRY_MAX_LENGTH + 1)
+    job_search.assign_attributes(board_relevance: ["Indeed", long])
+    expect(job_search).not_to be_valid
+    expect(job_search.errors[:board_relevance]).to be_present
+
+    job_search.assign_attributes(board_relevance: ["Indeed", "   "])
     expect(job_search).not_to be_valid
     expect(job_search.errors[:board_relevance]).to be_present
   end

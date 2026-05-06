@@ -1,120 +1,111 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["urlInput", "urlContainer", "addButton", "limitMessage"]
+  static targets = ["boardNameInput", "boardRelevanceContainer", "addButton", "limitMessage"]
 
   connect() {
-    this.MAX_URLS = 10
+    this.MAX_BOARD_ENTRIES = 10
     this.initializeValidation()
     this.updateAddButton()
   }
 
-  addUrl(event) {
+  addBoardRow(event) {
     event.preventDefault()
-    const currentUrls = this.urlContainerTarget.querySelectorAll('.board-url-input').length
-    
-    if (currentUrls < this.MAX_URLS) {
-      this.urlContainerTarget.appendChild(this.createUrlInput())
+    const count = this.boardRelevanceContainerTarget.querySelectorAll(".board-relevance-row").length
+
+    if (count < this.MAX_BOARD_ENTRIES) {
+      this.boardRelevanceContainerTarget.appendChild(this.createBoardRow())
       this.updateAddButton()
     }
   }
 
-  removeUrl(event) {
+  removeBoardRow(event) {
     event.preventDefault()
-    event.target.closest('.board-url-input').remove()
+    event.target.closest(".board-relevance-row").remove()
     this.updateAddButton()
   }
 
-  validateUrl(event) {
+  validateBoardEntry(event) {
     const input = event.target
-    const message = input.parentElement.querySelector('.url-validation-message')
-    const url = input.value.trim()
-    
-    if (!url) {
-      message.textContent = ''
-      message.className = 'url-validation-message'
+    const message = input.closest(".url-input-group")?.querySelector(".board-relevance-hint")
+    const raw = input.value.trim()
+
+    if (!message) return true
+
+    if (!raw) {
+      message.textContent = ""
+      message.className = "board-relevance-hint"
       return true
     }
 
-    try {
-      new URL(url)
-      if (url.startsWith('http://') || url.startsWith('https://')) {
-        message.textContent = '✓ Valid URL'
-        message.className = 'url-validation-message success'
-        return true
-      } else {
-        message.textContent = 'URL must start with http:// or https://'
-        message.className = 'url-validation-message error'
-        return false
-      }
-    } catch {
-      message.textContent = 'Please enter a valid URL'
-      message.className = 'url-validation-message error'
+    if (raw.length > 255) {
+      message.textContent = "Name must be 255 characters or fewer"
+      message.className = "board-relevance-hint error"
       return false
     }
+
+    message.textContent = ""
+    message.className = "board-relevance-hint"
+    return true
   }
 
   validateForm(event) {
-    const urlInputs = this.urlInputTargets
     let isValid = true
 
-    urlInputs.forEach(input => {
-      if (!this.validateUrl({ target: input })) {
+    this.boardNameInputTargets.forEach((input) => {
+      if (!this.validateBoardEntry({ target: input })) {
         isValid = false
       }
     })
 
     if (!isValid) {
       event.preventDefault()
-      alert('Please fix the invalid URLs before submitting.')
+      alert("Please fix invalid job board names before submitting.")
     }
   }
 
-  private
-
-  createUrlInput() {
-    const newInput = document.createElement('div')
-    newInput.className = 'board-url-input'
-    newInput.innerHTML = `
+  createBoardRow() {
+    const newRow = document.createElement("div")
+    newRow.className = "board-relevance-row"
+    newRow.innerHTML = `
       <div class="url-input-group">
         <div style="display: flex; gap: 0.5rem;">
-          <input type="text" 
-                 name="job_search[board_relevance][]" 
-                 class="form-input url-input" 
-                 data-job-search-target="urlInput"
-                 placeholder="https://www.linkedin.com/jobs/search/"
-                 pattern="^https?://.+"
-                 title="URL must start with http:// or https://">
-          <button type="button" 
-                  class="form-submit remove-url-button" 
-                  data-action="click->job-search#removeUrl">Remove</button>
+          <input type="text"
+                 name="job_search[board_relevance][]"
+                 class="form-input board-name-input"
+                 data-job-search-target="boardNameInput"
+                 placeholder="e.g. LinkedIn"
+                 maxlength="255">
+          <button type="button"
+                  class="form-submit remove-url-button"
+                  data-action="click->job-search#removeBoardRow">Remove</button>
         </div>
-        <div class="url-validation-message"></div>
+        <div class="board-relevance-hint"></div>
       </div>
     `
 
-    const input = newInput.querySelector('input')
-    input.addEventListener('input', (e) => this.validateUrl(e))
-    input.addEventListener('blur', (e) => this.validateUrl(e))
+    const input = newRow.querySelector("input")
+    input.addEventListener("input", (e) => this.validateBoardEntry(e))
+    input.addEventListener("blur", (e) => this.validateBoardEntry(e))
 
-    return newInput
+    return newRow
   }
 
   updateAddButton() {
-    const currentUrls = this.urlContainerTarget.querySelectorAll('.board-url-input').length
-    if (currentUrls >= this.MAX_URLS) {
-      this.addButtonTarget.style.display = 'none'
-      this.limitMessageTarget.style.display = 'block'
+    const count = this.boardRelevanceContainerTarget.querySelectorAll(".board-relevance-row").length
+    if (count >= this.MAX_BOARD_ENTRIES) {
+      this.addButtonTarget.style.display = "none"
+      this.limitMessageTarget.style.display = "block"
     } else {
-      this.addButtonTarget.style.display = 'block'
-      this.limitMessageTarget.style.display = 'none'
+      this.addButtonTarget.style.display = "block"
+      this.limitMessageTarget.style.display = "none"
     }
   }
 
   initializeValidation() {
-    this.urlInputTargets.forEach(input => {
-      input.addEventListener('input', (e) => this.validateUrl(e))
-      input.addEventListener('blur', (e) => this.validateUrl(e))
+    this.boardNameInputTargets.forEach((input) => {
+      input.addEventListener("input", (e) => this.validateBoardEntry(e))
+      input.addEventListener("blur", (e) => this.validateBoardEntry(e))
     })
   }
-} 
+}

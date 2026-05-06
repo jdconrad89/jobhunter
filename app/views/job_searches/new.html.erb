@@ -48,30 +48,32 @@
     </div>
 
     <div class="form-group">
-      <%= f.label :board_relevance, "Job Board URLs", class: "form-label" %>
-      <p class="form-helper-text">Add URLs for job boards you want to search. Each URL must start with http:// or https://</p>
-      <div id="board-urls" data-job-search-target="urlContainer">
-        <div class="board-url-input">
+      <%= f.label :board_relevance, "Preferred job boards (in order)", class: "form-label" %>
+      <p class="form-helper-text">
+        Enter names as they appear on &ldquo;Apply&rdquo; links in Google Jobs (e.g. LinkedIn, Indeed, ZipRecruiter).
+        Earlier boards are preferred when a listing has multiple apply options.
+      </p>
+      <div id="board-relevance-fields" data-job-search-target="boardRelevanceContainer">
+        <div class="board-relevance-row">
           <div class="url-input-group">
-            <%= text_field_tag "job_search[board_relevance][]", nil, 
-                class: "form-input url-input", 
-                data: { job_search_target: "urlInput" },
-                placeholder: "https://www.linkedin.com/jobs/search/",
-                pattern: "^https?://.+",
-                title: "URL must start with http:// or https://" %>
-            <div class="url-validation-message"></div>
+            <%= text_field_tag "job_search[board_relevance][]", nil,
+                class: "form-input board-name-input",
+                data: { job_search_target: "boardNameInput" },
+                placeholder: "e.g. LinkedIn",
+                maxlength: 255 %>
+            <div class="board-relevance-hint"></div>
           </div>
         </div>
       </div>
-      <button type="button" 
-              id="add-url" 
-              class="form-submit secondary-button" 
+      <button type="button"
+              id="add-board-entry"
+              class="form-submit secondary-button"
               data-job-search-target="addButton"
-              data-action="click->job-search#addUrl">Add Another URL</button>
-      <div id="url-limit-message" 
-           class="error-message" 
-           data-job-search-target="limitMessage" 
-           style="display: none;">Maximum 10 URLs allowed</div>
+              data-action="click->job-search#addBoardRow">Add another board</button>
+      <div id="board-limit-message"
+           class="error-message"
+           data-job-search-target="limitMessage"
+           style="display: none;">Maximum 10 boards allowed</div>
     </div>
 
     <div class="form-group">
@@ -86,18 +88,14 @@
     margin-bottom: 0.5rem;
   }
 
-  .url-validation-message {
+  .board-relevance-hint {
     font-size: 0.875rem;
     margin-top: 0.25rem;
     min-height: 1.25rem;
   }
 
-  .url-validation-message.error {
+  .board-relevance-hint.error {
     color: #dc2626;
-  }
-
-  .url-validation-message.success {
-    color: #059669;
   }
 
   .secondary-button {
@@ -124,108 +122,3 @@
     background-color: #b91c1c;
   }
 </style>
-
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    const addUrlButton = document.getElementById('add-url');
-    const boardUrls = document.getElementById('board-urls');
-    const urlLimitMessage = document.getElementById('url-limit-message');
-    const MAX_URLS = 10;
-
-    function validateUrl(input) {
-      const url = input.value.trim();
-      const message = input.parentElement.querySelector('.url-validation-message');
-      
-      if (!url) {
-        message.textContent = '';
-        message.className = 'url-validation-message';
-        return true;
-      }
-
-      try {
-        new URL(url);
-        if (url.startsWith('http://') || url.startsWith('https://')) {
-          message.textContent = '✓ Valid URL';
-          message.className = 'url-validation-message success';
-          return true;
-        } else {
-          message.textContent = 'URL must start with http:// or https://';
-          message.className = 'url-validation-message error';
-          return false;
-        }
-      } catch {
-        message.textContent = 'Please enter a valid URL';
-        message.className = 'url-validation-message error';
-        return false;
-      }
-    }
-
-    function createUrlInput() {
-      const newInput = document.createElement('div');
-      newInput.className = 'board-url-input';
-      newInput.innerHTML = `
-        <div class="url-input-group">
-          <div style="display: flex; gap: 0.5rem;">
-            <input type="text" 
-                   name="job_search[board_relevance][]" 
-                   class="form-input url-input" 
-                   placeholder="https://www.linkedin.com/jobs/search/"
-                   pattern="^https?://.+"
-                   title="URL must start with http:// or https://">
-            <button type="button" class="form-submit remove-url-button" onclick="this.closest('.board-url-input').remove(); updateAddButton()">Remove</button>
-          </div>
-          <div class="url-validation-message"></div>
-        </div>
-      `;
-
-      const input = newInput.querySelector('input');
-      input.addEventListener('input', () => validateUrl(input));
-      input.addEventListener('blur', () => validateUrl(input));
-
-      return newInput;
-    }
-
-    function updateAddButton() {
-      const currentUrls = boardUrls.querySelectorAll('.board-url-input').length;
-      if (currentUrls >= MAX_URLS) {
-        addUrlButton.style.display = 'none';
-        urlLimitMessage.style.display = 'block';
-      } else {
-        addUrlButton.style.display = 'block';
-        urlLimitMessage.style.display = 'none';
-      }
-    }
-
-    addUrlButton.addEventListener('click', function() {
-      const currentUrls = boardUrls.querySelectorAll('.board-url-input').length;
-      if (currentUrls < MAX_URLS) {
-        boardUrls.appendChild(createUrlInput());
-        updateAddButton();
-      }
-    });
-
-    // Initialize validation for the first URL input
-    const firstInput = boardUrls.querySelector('.url-input');
-    if (firstInput) {
-      firstInput.addEventListener('input', () => validateUrl(firstInput));
-      firstInput.addEventListener('blur', () => validateUrl(firstInput));
-    }
-
-    // Add form submission validation
-    document.querySelector('form').addEventListener('submit', function(e) {
-      const urlInputs = document.querySelectorAll('.url-input');
-      let isValid = true;
-
-      urlInputs.forEach(input => {
-        if (!validateUrl(input)) {
-          isValid = false;
-        }
-      });
-
-      if (!isValid) {
-        e.preventDefault();
-        alert('Please fix the invalid URLs before submitting.');
-      }
-    });
-  });
-</script>
