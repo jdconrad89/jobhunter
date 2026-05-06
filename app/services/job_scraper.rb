@@ -5,21 +5,19 @@ class JobScraper
     @remote = job_search.remote
     @language_code = job_search.language_code
     @board_relevance = Array(job_search.board_relevance)
-    @job_boards_covered = []
     @number_of_jobs = job_search.number_of_jobs
   end
 
   def scrape
     response = []
     next_page_token = nil
-    current_number_of_jobs = 0
     total_number_of_jobs = 0
 
     Rails.logger.info "Starting to scrape jobs for: #{@job_title}"
 
     target_count = @number_of_jobs.to_i.positive? ? @number_of_jobs : 100
     while response.length < target_count
-      current_response = get_page_result(next_page_token: next_page_token)
+      current_response = serpapi_response(next_page_token: next_page_token)
       break if current_response[:jobs_results].nil?
 
       total_number_of_jobs += current_response[:jobs_results].length
@@ -33,7 +31,7 @@ class JobScraper
             company_name: result[:company_name],
             company_website: result[:company_website],
             company_description: result[:company_description],
-            url: get_url(result),
+            url: apply_option_url(result),
             description: result[:description],
             location: result[:location],
             remote: result[:remote],
@@ -44,7 +42,6 @@ class JobScraper
 
       Rails.logger.info "Scraping... #{response.length} unique jobs out of #{total_number_of_jobs} jobs scraped."
 
-      current_number_of_jobs = response.length
       break if current_response[:serpapi_pagination].nil?
       next_page_token = current_response[:serpapi_pagination][:next_page_token]
     end
@@ -54,7 +51,7 @@ class JobScraper
 
   private
 
-  def get_page_result(next_page_token: nil)
+  def serpapi_response(next_page_token: nil)
     search = GoogleSearch.new(request_params(next_page_token: next_page_token))
     search.get_hash
   end
@@ -70,12 +67,12 @@ class JobScraper
 
     params.merge!(next_page_token: next_page_token) if next_page_token
     params.merge!(location: @location) if @location
-    params.merge!(ltype: get_remote_code(@remote)) if @remote != nil
+    params.merge!(ltype: remote_type(@remote)) if @remote != nil
     params
   end
 
-  def get_url(result)
-    sorted_links = sort_links_by_relevance(result[:apply_options])
+  def apply_option_url(result)
+    sorted_links = sort_apply_options_by_board_relevance(result[:apply_options])
     return nil if sorted_links.empty?
 
     uri = URI.parse(sorted_links.first[:link])
@@ -86,15 +83,15 @@ class JobScraper
     uri.to_s
   end
 
-  def sort_links_by_relevance(apply_options)
+  def sort_apply_options_by_board_relevance(apply_options)
     return [] if apply_options.nil?
 
+    boards_index = board_relevance_normalized
     apply_options.sort_by do |option|
       next Float::INFINITY if option[:title].nil?
-      @job_boards_covered << option[:title] unless @job_boards_covered.include?(option[:title])
 
       normalized_title = option[:title].downcase.gsub(/\s+/, '')
-      board_relevance_normalized.index(normalized_title) || Float::INFINITY
+      boards_index.index(normalized_title) || Float::INFINITY
     end
   end
 
@@ -104,7 +101,7 @@ class JobScraper
     end
   end
 
-  def get_remote_code(remote)
+  def remote_type(remote)
     case remote
     when true
       1
@@ -118,19 +115,20 @@ class JobScraper
   def parse_posted_date(posted_at)
     return nil if posted_at.nil?
 
-    case posted_at.downcase
-    when /(\d+)\s+days?/
-      $1.to_i.days.ago
-    when /(\d+)\s+weeks?/
-      $1.to_i.weeks.ago
-    when /(\d+)\s+months?/
-      $1.to_i.months.ago
-    when /today/
+    lowercased_posted_at = posted_at.downcase
+
+    if (day_count = lowercased_posted_at[/(\d+)\s+days?/, 1])
+      day_count.to_i.days.ago
+    elsif (week_count = lowercased_posted_at[/(\d+)\s+weeks?/, 1])
+      week_count.to_i.weeks.ago
+    elsif (month_count = lowercased_posted_at[/(\d+)\s+months?/, 1])
+      month_count.to_i.months.ago
+    elsif lowercased_posted_at.match?(/today/)
       Time.current
-    when /yesterday/
+    elsif lowercased_posted_at.match?(/yesterday/)
       1.day.ago
     else
       Time.current
     end
   end
-end 
+end

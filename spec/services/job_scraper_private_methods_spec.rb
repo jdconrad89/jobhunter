@@ -16,9 +16,9 @@ RSpec.describe JobScraper do
 
     it "maps remote flag to ltype codes" do
       scraper = described_class.new(job_search: stub_job_search_for_job_scraper)
-      expect(scraper.send(:get_remote_code, true)).to eq(1)
-      expect(scraper.send(:get_remote_code, false)).to eq(0)
-      expect(scraper.send(:get_remote_code, nil)).to be_nil
+      expect(scraper.send(:remote_type, true)).to eq(1)
+      expect(scraper.send(:remote_type, false)).to eq(0)
+      expect(scraper.send(:remote_type, nil)).to be_nil
     end
 
     it "parses posted date strings" do
@@ -36,13 +36,13 @@ RSpec.describe JobScraper do
 
     it "returns nil url when no apply options" do
       scraper = described_class.new(job_search: stub_job_search_for_job_scraper)
-      expect(scraper.send(:get_url, { apply_options: nil })).to be_nil
+      expect(scraper.send(:apply_option_url, { apply_options: nil })).to be_nil
     end
 
     it "strips utm params from url" do
       scraper = described_class.new(job_search: stub_job_search_for_job_scraper)
       result = { apply_options: [{ title: "Direct", link: "https://example.com/apply?utm_source=x&foo=bar&utm_medium=y" }] }
-      expect(scraper.send(:get_url, result)).to eq("https://example.com/apply?foo=bar")
+      expect(scraper.send(:apply_option_url, result)).to eq("https://example.com/apply?foo=bar")
     end
 
     it "sorts links by board relevance" do
@@ -51,7 +51,7 @@ RSpec.describe JobScraper do
         { title: "LinkedIn", link: "https://li.example.com" },
         { title: "Indeed", link: "https://in.example.com" }
       ]
-      sorted = scraper.send(:sort_links_by_relevance, options)
+      sorted = scraper.send(:sort_apply_options_by_board_relevance, options)
       expect(sorted.first[:title]).to eq("Indeed")
     end
   end

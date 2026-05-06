@@ -50,7 +50,7 @@ RSpec.describe JobScraper do
         serpapi_pagination: nil
       }
 
-      allow(scraper).to receive(:get_page_result).and_return(page1, page2)
+      allow(scraper).to receive(:serpapi_response).and_return(page1, page2)
 
       results = scraper.scrape
       expect(results.length).to eq(2)
@@ -62,7 +62,7 @@ RSpec.describe JobScraper do
 
     it "stops when jobs_results is nil" do
       scraper = described_class.new(job_search: stub_job_search_for_job_scraper(number_of_jobs: 10))
-      allow(scraper).to receive(:get_page_result).and_return({ jobs_results: nil })
+      allow(scraper).to receive(:serpapi_response).and_return({ jobs_results: nil })
 
       expect(scraper.scrape).to eq([])
     end
