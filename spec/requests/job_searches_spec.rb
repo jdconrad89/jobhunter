@@ -17,4 +17,3 @@ RSpec.describe "JobSearches", type: :request do
     end
   end
 end
-

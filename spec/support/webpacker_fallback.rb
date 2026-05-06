@@ -19,4 +19,3 @@ begin
 rescue LoadError
   # Webpacker not present in this environment.
 end
-

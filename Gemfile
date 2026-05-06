@@ -18,7 +18,7 @@ gem "stimulus-rails"
 gem "jbuilder"
 
 # Use Active Model has_secure_password [https://guides.rubyonrails.org/active_model_basics.html#securepassword]
-gem 'bcrypt', '~> 3.1.7'
+gem "bcrypt", "~> 3.1.7"
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem "tzinfo-data", platforms: %i[ windows jruby ]
@@ -40,26 +40,26 @@ gem "thruster", require: false
 # Use Active Storage variants [https://guides.rubyonrails.org/active_storage_overview.html#transforming-images]
 # gem "image_processing", "~> 1.2"
 
-gem 'dotenv'
-gem 'google_search_results'
+gem "dotenv"
+gem "google_search_results"
 
 # Background job processing
 gem "sidekiq"
 
 # React and frontend
-gem 'jsbundling-rails'
-gem 'react-rails'
-gem 'sprockets-rails'
+gem "jsbundling-rails"
+gem "react-rails"
+gem "sprockets-rails"
 
-gem 'webpacker', '~> 5.4'
+gem "webpacker", "~> 5.4"
 
-gem 'kaminari'
+gem "kaminari"
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri windows ]
-  gem 'pry'
-  gem 'pry-rails'
+  gem "pry"
+  gem "pry-rails"
   gem "rspec-rails"
 
   # Static analysis for security vulnerabilities [https://brakemanscanner.org/]

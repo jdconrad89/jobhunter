@@ -7,4 +7,3 @@ RSpec.describe Company, type: :model do
     expect(company.errors[:name]).to be_present
   end
 end
-

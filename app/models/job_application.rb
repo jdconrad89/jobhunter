@@ -13,7 +13,7 @@ class JobApplication < ApplicationRecord
   private
 
   def set_initial_status
-    self.status ||= 'applied'
+    self.status ||= "applied"
     self.applied_at ||= Time.current
   end
-end 
+end

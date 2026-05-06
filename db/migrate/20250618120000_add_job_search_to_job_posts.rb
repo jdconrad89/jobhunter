@@ -10,7 +10,7 @@ class AddJobSearchToJobPosts < ActiveRecord::Migration[8.0]
         end
         change_column_null :job_posts, :job_search_id, false
         remove_index :job_posts, :website, unique: true
-        add_index :job_posts, [:job_search_id, :website], unique: true
+        add_index :job_posts, [ :job_search_id, :website ], unique: true
       end
     end
   end

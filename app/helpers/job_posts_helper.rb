@@ -10,4 +10,3 @@ module JobPostsHelper
     formatted.gsub(Regexp.new("(#{escaped})"), '<span class="pay-range-highlight">\1</span>')
   end
 end
-

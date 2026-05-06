@@ -14,7 +14,7 @@ RSpec.describe JobPost, type: :model do
 
       results = JobPost.filtered(ActionController::Parameters.new(company: "acme"))
       expect(results).to include(acme_post)
-      expect(results.map(&:company_id).uniq).to eq([acme.id])
+      expect(results.map(&:company_id).uniq).to eq([ acme.id ])
     end
 
     it "filters by remote=true and remote=false" do
@@ -64,8 +64,7 @@ RSpec.describe JobPost, type: :model do
       newer.update_columns(created_at: 1.day.ago)
 
       results = JobPost.filtered(ActionController::Parameters.new)
-      expect(results.first(2)).to eq([newer, older])
+      expect(results.first(2)).to eq([ newer, older ])
     end
   end
 end
-

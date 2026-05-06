@@ -1,6 +1,6 @@
 class JobPostsController < ApplicationController
   before_action :require_login
-  before_action :set_job_post, only: [:show]
+  before_action :set_job_post, only: [ :show ]
 
   def index
     @job_posts = JobPost.filtered(params)
@@ -80,7 +80,7 @@ class JobPostsController < ApplicationController
     per_page = params[:per_page].to_i
     return 10 if per_page <= 0
 
-    allowed = [10, 20, 50]
+    allowed = [ 10, 20, 50 ]
     allowed.include?(per_page) ? per_page : 10
   end
 end

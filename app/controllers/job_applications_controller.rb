@@ -1,6 +1,6 @@
 class JobApplicationsController < ApplicationController
   before_action :require_login
-  before_action :set_job_application, only: [:show, :edit, :update]
+  before_action :set_job_application, only: [ :show, :edit, :update ]
 
   def index
     @job_applications = current_user.job_applications.includes(job_post: :company).order(updated_at: :desc)
@@ -55,7 +55,7 @@ class JobApplicationsController < ApplicationController
   end
 
   def job_application_params
-    params.permit(:status, :contact_info, :followed_up, job_application: [:status, :contact_info, :followed_up]).yield_self do |p|
+    params.permit(:status, :contact_info, :followed_up, job_application: [ :status, :contact_info, :followed_up ]).yield_self do |p|
       if p[:job_application].present?
         p.require(:job_application).permit(:status, :contact_info, :followed_up)
       else

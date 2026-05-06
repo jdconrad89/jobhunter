@@ -58,11 +58,11 @@ class JobScraper
 
   def request_params(next_page_token: nil)
     params = {
-      engine: 'google_jobs',
+      engine: "google_jobs",
       q: @job_title,
       hl: @language_code,
       no_cache: true,
-      api_key: ENV['SERPAPI_API_KEY']
+      api_key: ENV["SERPAPI_API_KEY"]
     }
 
     params.merge!(next_page_token: next_page_token) if next_page_token
@@ -77,7 +77,7 @@ class JobScraper
 
     uri = URI.parse(sorted_links.first[:link])
     query_params = CGI.parse(uri.query.to_s)
-    filtered_params = query_params.reject { |key| key.start_with?('utm') }
+    filtered_params = query_params.reject { |key| key.start_with?("utm") }
     uri.query = URI.encode_www_form(filtered_params)
 
     uri.to_s
@@ -90,14 +90,14 @@ class JobScraper
     apply_options.sort_by do |option|
       next Float::INFINITY if option[:title].nil?
 
-      normalized_title = option[:title].downcase.gsub(/\s+/, '')
+      normalized_title = option[:title].downcase.gsub(/\s+/, "")
       boards_index.index(normalized_title) || Float::INFINITY
     end
   end
 
   def board_relevance_normalized
     @board_relevance_normalized ||= @board_relevance.map do |board|
-      board.downcase.gsub(/\s+/, '')
+      board.downcase.gsub(/\s+/, "")
     end
   end
 

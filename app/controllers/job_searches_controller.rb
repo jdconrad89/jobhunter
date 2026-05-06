@@ -1,6 +1,6 @@
 class JobSearchesController < ApplicationController
   before_action :require_login
-  before_action :set_job_search, only: [:show, :edit, :update, :destroy, :trigger]
+  before_action :set_job_search, only: [ :show, :edit, :update, :destroy, :trigger ]
 
   def index
     @job_searches = current_user.job_searches
@@ -17,7 +17,7 @@ class JobSearchesController < ApplicationController
     @job_search = current_user.job_searches.build(job_search_params)
 
     if @job_search.save
-      redirect_to dashboard_path, notice: 'Job search was successfully created.'
+      redirect_to dashboard_path, notice: "Job search was successfully created."
     else
       render :new, status: :unprocessable_entity
     end
@@ -28,7 +28,7 @@ class JobSearchesController < ApplicationController
 
   def update
     if @job_search.update(job_search_params)
-      redirect_to dashboard_path, notice: 'Job search was successfully updated.'
+      redirect_to dashboard_path, notice: "Job search was successfully updated."
     else
       render :edit, status: :unprocessable_entity
     end
@@ -36,12 +36,12 @@ class JobSearchesController < ApplicationController
 
   def destroy
     @job_search.destroy
-    redirect_to dashboard_path, notice: 'Job search was successfully deleted.'
+    redirect_to dashboard_path, notice: "Job search was successfully deleted."
   end
 
   def trigger
     JobScraperJob.perform_later(@job_search.id)
-    redirect_to dashboard_path, notice: 'Job search has been triggered and will run shortly.'
+    redirect_to dashboard_path, notice: "Job search has been triggered and will run shortly."
   end
 
   private

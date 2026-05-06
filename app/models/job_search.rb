@@ -30,7 +30,7 @@ class JobSearch < ApplicationRecord
       min: runtime.min,
       sec: 0
     )
-    
+
     if today_run > now
       today_run
     else
@@ -68,4 +68,4 @@ class JobSearch < ApplicationRecord
       end
     end
   end
-end 
+end

@@ -1,32 +1,32 @@
 Rails.application.routes.draw do
   root "dashboard#index"
-  
+
   get "about", to: "home#about"
   get "contact", to: "home#contact"
-  
+
   resources :job_searches do
     member do
       post :trigger
     end
   end
 
-  resources :job_posts, only: [:index, :show, :new, :create] do
-    resources :job_applications, only: [:create]
+  resources :job_posts, only: [ :index, :show, :new, :create ] do
+    resources :job_applications, only: [ :create ]
   end
 
-  resources :job_applications, only: [:index, :show, :edit, :update]
+  resources :job_applications, only: [ :index, :show, :edit, :update ]
 
   get "dashboard", to: "dashboard#index"
-  
+
   get "signup", to: "users#new"
   post "signup", to: "users#create"
-  
+
   get "login", to: "sessions#new"
   post "login", to: "sessions#create"
   delete "logout", to: "sessions#destroy"
 
   namespace :api do
-    resources :job_posts, only: [:index]
+    resources :job_posts, only: [ :index ]
   end
 
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html

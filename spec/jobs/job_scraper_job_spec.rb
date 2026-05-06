@@ -69,4 +69,3 @@ RSpec.describe JobScraperJob, type: :job do
     expect(Company.where(name: "TxCo")).not_to exist
   end
 end
-

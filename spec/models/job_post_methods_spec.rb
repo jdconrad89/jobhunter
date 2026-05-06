@@ -12,7 +12,7 @@ RSpec.describe JobPost, type: :model do
     it "extracts and parses $120k-$160k" do
       post = make_post(description: "Compensation: $120k - $160k per year")
       expect(post.extract_pay_range).to match(/\$120k\s*-\s*\$160k/i)
-      expect(post.parse_pay_range_numbers).to eq([120_000, 160_000])
+      expect(post.parse_pay_range_numbers).to eq([ 120_000, 160_000 ])
     end
 
     it "returns nil when description blank" do
@@ -26,13 +26,13 @@ RSpec.describe JobPost, type: :model do
     it "extracts range experience and parses years" do
       post = make_post(description: "Requirements: 3-5 years experience with Rails")
       expect(post.extract_experience_requirement).to eq("3-5 years")
-      expect(post.parse_experience_years).to eq([3, 5])
+      expect(post.parse_experience_years).to eq([ 3, 5 ])
     end
 
     it "extracts single experience and parses years" do
       post = make_post(description: "Minimum 4 years of experience")
       expect(post.extract_experience_requirement).to eq("4+ years")
-      expect(post.parse_experience_years).to eq([4, 4])
+      expect(post.parse_experience_years).to eq([ 4, 4 ])
     end
 
     it "extracts word-based experience" do
@@ -73,7 +73,7 @@ RSpec.describe JobPost, type: :model do
       _none = create_job_post!(company: company, job_search: job_search, title: "None", website: "https://example.com/none", description: "Elixir Phoenix", remote: true)
 
       suggestions = base.suggested_jobs(limit: 2, candidate_pool: 10)
-      expect(suggestions.map(&:first).map(&:id)).to eq([best.id, ok.id])
+      expect(suggestions.map(&:first).map(&:id)).to eq([ best.id, ok.id ])
       expect(suggestions.first.last).to include("Ruby on Rails", "React", "AWS")
     end
   end
@@ -92,4 +92,3 @@ RSpec.describe JobPost, type: :model do
     end
   end
 end
-

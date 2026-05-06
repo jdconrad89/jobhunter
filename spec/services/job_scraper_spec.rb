@@ -12,7 +12,7 @@ RSpec.describe JobScraper do
             company_name: "Acme",
             company_website: nil,
             company_description: nil,
-            apply_options: [{ title: "Direct", link: "https://example.com/apply?utm_source=x&foo=bar" }],
+            apply_options: [ { title: "Direct", link: "https://example.com/apply?utm_source=x&foo=bar" } ],
             description: "Desc",
             location: "Anywhere",
             remote: true,
@@ -23,7 +23,7 @@ RSpec.describe JobScraper do
             company_name: "Acme",
             company_website: nil,
             company_description: nil,
-            apply_options: [{ title: "Direct", link: "https://example.com/apply?utm_medium=y&foo=baz" }],
+            apply_options: [ { title: "Direct", link: "https://example.com/apply?utm_medium=y&foo=baz" } ],
             description: "Desc",
             location: "Anywhere",
             remote: true,
@@ -40,7 +40,7 @@ RSpec.describe JobScraper do
             company_name: "Beta",
             company_website: nil,
             company_description: nil,
-            apply_options: [{ title: "Direct", link: "https://example.com/apply2?utm_campaign=z&foo=bar" }],
+            apply_options: [ { title: "Direct", link: "https://example.com/apply2?utm_campaign=z&foo=bar" } ],
             description: "Desc2",
             location: "Anywhere",
             remote: false,
@@ -54,7 +54,7 @@ RSpec.describe JobScraper do
 
       results = scraper.scrape
       expect(results.length).to eq(2)
-      expect(results.map { |r| [r[:title], r[:company_name]] }).to contain_exactly(["Engineer", "Acme"], ["Senior Engineer", "Beta"])
+      expect(results.map { |r| [ r[:title], r[:company_name] ] }).to contain_exactly([ "Engineer", "Acme" ], [ "Senior Engineer", "Beta" ])
 
       engineer = results.find { |r| r[:title] == "Engineer" }
       expect(engineer[:url]).to eq("https://example.com/apply?foo=bar")
@@ -68,4 +68,3 @@ RSpec.describe JobScraper do
     end
   end
 end
-

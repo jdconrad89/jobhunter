@@ -5,4 +5,4 @@ class DashboardController < ApplicationController
     @job_searches = current_user.job_searches.order(created_at: :desc)
     @job_applications = current_user.job_applications.includes(:job_post).order(created_at: :desc)
   end
-end 
+end

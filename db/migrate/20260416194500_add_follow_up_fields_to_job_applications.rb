@@ -4,4 +4,3 @@ class AddFollowUpFieldsToJobApplications < ActiveRecord::Migration[8.0]
     add_column :job_applications, :followed_up, :boolean, null: false, default: false
   end
 end
-

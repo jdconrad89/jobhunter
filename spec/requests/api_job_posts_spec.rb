@@ -14,4 +14,3 @@ RSpec.describe "Api::JobPosts", type: :request do
     expect(body.first["company"]).to include("name" => "Acme")
   end
 end
-

@@ -50,4 +50,3 @@ module ModelHelpers
     )
   end
 end
-

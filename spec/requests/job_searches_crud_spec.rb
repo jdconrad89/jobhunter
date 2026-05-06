@@ -5,7 +5,7 @@ RSpec.describe "JobSearches CRUD", type: :request do
     user = create_user!(email: "jscrud@example.com")
     sign_in_as(user)
 
-    post job_searches_path, params: { job_search: { job_title: "Ruby", location: "Anywhere", remote: true, language_code: "en", timezone: "UTC", board_relevance: ["Indeed"] } }
+    post job_searches_path, params: { job_search: { job_title: "Ruby", location: "Anywhere", remote: true, language_code: "en", timezone: "UTC", board_relevance: [ "Indeed" ] } }
     expect(response).to redirect_to(dashboard_path)
 
     job_search = user.job_searches.order(created_at: :desc).first
@@ -25,4 +25,3 @@ RSpec.describe "JobSearches CRUD", type: :request do
     expect(JobSearch.where(id: job_search.id)).not_to exist
   end
 end
-

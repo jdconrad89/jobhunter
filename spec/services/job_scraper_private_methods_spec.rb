@@ -41,12 +41,12 @@ RSpec.describe JobScraper do
 
     it "strips utm params from url" do
       scraper = described_class.new(job_search: stub_job_search_for_job_scraper)
-      result = { apply_options: [{ title: "Direct", link: "https://example.com/apply?utm_source=x&foo=bar&utm_medium=y" }] }
+      result = { apply_options: [ { title: "Direct", link: "https://example.com/apply?utm_source=x&foo=bar&utm_medium=y" } ] }
       expect(scraper.send(:apply_option_url, result)).to eq("https://example.com/apply?foo=bar")
     end
 
     it "sorts links by board relevance" do
-      scraper = described_class.new(job_search: stub_job_search_for_job_scraper(board_relevance: ["Indeed", "LinkedIn"]))
+      scraper = described_class.new(job_search: stub_job_search_for_job_scraper(board_relevance: [ "Indeed", "LinkedIn" ]))
       options = [
         { title: "LinkedIn", link: "https://li.example.com" },
         { title: "Indeed", link: "https://in.example.com" }
@@ -56,4 +56,3 @@ RSpec.describe JobScraper do
     end
   end
 end
-

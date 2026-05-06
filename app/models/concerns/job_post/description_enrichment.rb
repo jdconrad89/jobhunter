@@ -71,7 +71,7 @@ module JobPost::DescriptionEnrichment
       value = num_str.gsub(/k$/i, "").to_f
       (value * multiplier).to_i
     end
-    numbers.size >= 2 ? [numbers.min, numbers.max] : nil
+    numbers.size >= 2 ? [ numbers.min, numbers.max ] : nil
   end
 
   def extract_experience_requirement
@@ -98,9 +98,9 @@ module JobPost::DescriptionEnrichment
     return nil if requirement.blank?
 
     if (match = requirement.match(/(\d{1,2})-(\d{1,2})/))
-      [match[1].to_i, match[2].to_i]
+      [ match[1].to_i, match[2].to_i ]
     elsif (match = requirement.match(/(\d{1,2})\+/))
-      [match[1].to_i, match[1].to_i]
+      [ match[1].to_i, match[1].to_i ]
     else
       nil
     end
@@ -109,12 +109,12 @@ module JobPost::DescriptionEnrichment
   def contract?
     return false if title.blank? && description.blank?
 
-    text = [title, description].compact.join(" ")
+    text = [ title, description ].compact.join(" ")
     %w[contract contractor contract position].any? { |term| text.downcase.include?(term) }
   end
 
   def extracted_skills
-    text = [title, description].compact.join(" ")
+    text = [ title, description ].compact.join(" ")
     return [] if text.blank?
 
     SKILL_PATTERNS.each_with_object([]) do |(skill, pattern), found|

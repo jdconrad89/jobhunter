@@ -25,16 +25,16 @@ RSpec.describe JobSearch, type: :model do
       job_title: "Ruby",
       language_code: "en",
       timezone: "UTC",
-      board_relevance: ["Indeed", "LinkedIn"]
+      board_relevance: [ "Indeed", "LinkedIn" ]
     )
     expect(job_search).to be_valid
 
     long = "a" * (JobSearch::BOARD_RELEVANCE_ENTRY_MAX_LENGTH + 1)
-    job_search.assign_attributes(board_relevance: ["Indeed", long])
+    job_search.assign_attributes(board_relevance: [ "Indeed", long ])
     expect(job_search).not_to be_valid
     expect(job_search.errors[:board_relevance]).to be_present
 
-    job_search.assign_attributes(board_relevance: ["Indeed", "   "])
+    job_search.assign_attributes(board_relevance: [ "Indeed", "   " ])
     expect(job_search).not_to be_valid
     expect(job_search.errors[:board_relevance]).to be_present
   end
@@ -83,4 +83,3 @@ RSpec.describe JobSearch, type: :model do
     expect(job_search.reload.number_of_jobs).to eq(1)
   end
 end
-
