@@ -19,8 +19,14 @@
     <%= form_with model: @job_application, url: job_application_path(@job_application), method: :patch do |f| %>
       <div class="job-app-show__grid">
         <div class="job-app-show__field">
-          <%= f.label :status %>
+          <%= f.label :status, "Pipeline status" %>
           <%= f.select :status, JobApplicationsController::STATUSES.map { |s| [s.humanize, s] }, {}, class: "job-app-show__select" %>
+        </div>
+
+        <div class="job-app-show__field job-app-show__field--checkbox">
+          <%= hidden_field_tag :mark_as_ghosted, "0" %>
+          <%= check_box_tag :mark_as_ghosted, "1", @job_application.status == "ghosted", id: "job_app_mark_as_ghosted" %>
+          <%= label_tag :job_app_mark_as_ghosted, "Ghosted — no meaningful employer response (manual)" %>
         </div>
 
         <div class="job-app-show__field job-app-show__field--checkbox">

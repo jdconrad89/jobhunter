@@ -35,31 +35,15 @@ RSpec.describe JobApplication, type: :model do
     expect(dup.errors[:job_post_id]).to be_present
   end
 
-  it "auto-ghosts applications not updated in 2 weeks" do
+  it "allows ghosted status to be set manually" do
     user = create_user!(email: "ja4@example.com")
     job_search = create_job_search!(user: user)
     company = create_company!
     job_post = create_job_post!(company: company, job_search: job_search, website: "https://example.com/d")
 
     application = JobApplication.create!(user: user, job_post: job_post, status: "interviewing", applied_at: Time.current)
-    application.update_column(:updated_at, 3.weeks.ago)
-    application.update!(status: "interviewing")
+    application.update!(status: "ghosted")
 
     expect(application.reload.status).to eq("ghosted")
   end
-
-  it "does not allow ghosted status if recently updated" do
-    user = create_user!(email: "ja5@example.com")
-    job_search = create_job_search!(user: user)
-    company = create_company!
-    job_post = create_job_post!(company: company, job_search: job_search, website: "https://example.com/e")
-
-    application = JobApplication.create!(user: user, job_post: job_post, status: "interviewing", applied_at: Time.current)
-    application.update_column(:updated_at, 1.day.ago)
-    application.status = "ghosted"
-
-    expect(application).not_to be_valid
-    expect(application.errors[:status]).to be_present
-  end
 end
-

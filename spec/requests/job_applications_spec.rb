@@ -61,6 +61,32 @@ RSpec.describe "JobApplications", type: :request do
     expect(response).to have_http_status(:unprocessable_entity)
   end
 
+  it "sets ghosted via manual checkbox on HTML update" do
+    user = create_user!(email: "ja_ghost@example.com")
+    sign_in_as(user)
+
+    job_search = create_job_search!(user: user)
+    company = create_company!
+    post_record = create_job_post!(company: company, job_search: job_search, website: "https://example.com/ghost")
+    application = JobApplication.create!(user: user, job_post: post_record, status: "interviewing")
+
+    patch job_application_path(application), params: {
+      job_application: { status: "interviewing", contact_info: "", followed_up: false },
+      mark_as_ghosted: "1"
+    }
+
+    expect(response).to redirect_to(job_applications_path)
+    expect(application.reload.status).to eq("ghosted")
+
+    patch job_application_path(application), params: {
+      job_application: { status: "ghosted", contact_info: "", followed_up: false },
+      mark_as_ghosted: "0"
+    }
+
+    expect(response).to redirect_to(job_applications_path)
+    expect(application.reload.status).to eq("applied")
+  end
+
   it "renders show and updates contact info + followed_up via HTML" do
     user = create_user!(email: "ja_show@example.com")
     sign_in_as(user)

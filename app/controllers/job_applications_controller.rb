@@ -27,7 +27,9 @@ class JobApplicationsController < ApplicationController
       return render json: { error: "Invalid status" }, status: :unprocessable_entity
     end
 
-    if @job_application.update(job_application_params)
+    attrs = ghosted_checkbox_merged_attributes(job_application_params)
+
+    if @job_application.update(attrs)
       respond_to do |format|
         format.html { redirect_to job_applications_path, notice: "Application updated." }
         format.json { render json: { ok: true, status: @job_application.status } }
@@ -62,5 +64,18 @@ class JobApplicationsController < ApplicationController
         p.slice(:status, :contact_info, :followed_up)
       end
     end
+  end
+
+  # HTML form sends top-level mark_as_ghosted ("0" / "1"). JSON/drag-drop omit it and use status only.
+  def ghosted_checkbox_merged_attributes(permitted)
+    return permitted unless params.key?(:mark_as_ghosted)
+
+    h = permitted.to_h.symbolize_keys
+    if params[:mark_as_ghosted] == "1"
+      h[:status] = "ghosted"
+    elsif h[:status] == "ghosted"
+      h[:status] = "applied"
+    end
+    h
   end
 end
