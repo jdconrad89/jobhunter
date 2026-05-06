@@ -110,7 +110,7 @@ module JobPost::DescriptionEnrichment
     return false if title.blank? && description.blank?
 
     text = [ title, description ].compact.join(" ")
-    %w[contract contractor contract position].any? { |term| text.downcase.include?(term) }
+    %w[contract contractor].any? { |term| text.downcase.include?(term) }
   end
 
   def extracted_skills
