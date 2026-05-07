@@ -100,7 +100,7 @@ Included by `JobPost`. Holds regex dictionaries and logic to:
 ### `JobScraper` (`app/services/job_scraper.rb`)
 
 - Initialized with `**job_search:**` (reads title, location, remote, language, board list, target count).
-- `**#scrape**`: pages SerpAPI Google Jobs (`GoogleSearch` / `google_search_results`), deduplicates by title + company, respects `number_of_jobs` vs default cap, normalizes apply URLs (e.g. strips `utm_*` query params), sorts apply options using `**board_relevance**`, parses relative posted-at strings.
+- `**#scrape**`: pages SerpAPI Google Jobs (`GoogleSearch` / `google_search_results`), deduplicates by title + company, normalizes apply URLs (e.g. strips `utm_*` query params), sorts apply options using `**board_relevance**`, parses relative posted-at strings.
 - **No database writes**—returns an array of hashes for the job to persist.
 
 ---
