@@ -27,6 +27,8 @@ class JobScraperJob < ApplicationJob
   private
 
   # One transaction per scrape so a failure mid-import does not leave partial companies/posts.
+  # TODO: We shouldn't care about rolling back the other jobs created if there is an error, we should instead skip to the next job. IF we wanted to care about
+  # the failures we could create an array of failed JobPosts and we could either retry them or return a message to the user that some jobs were not created.
   def import_scrape_results!(job_search, results)
     ActiveRecord::Base.transaction do
       results.each do |job_data|
