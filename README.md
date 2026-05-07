@@ -249,3 +249,11 @@ bin/dev   # or rails s + separate JS watcher, plus Sidekiq as needed
 5. **Heavy** `JobPost` **behavior is split**, concerns + `JobPosts::Filter` + helper keep the AR class focused on persistence and associations.
 
 If you extend the app, prefer new **service objects** for integrations, **query objects** under `app/models/.../filter.rb` (or `app/queries`) for complex reads, and **jobs** only for async orchestration and retries.
+
+
+---
+
+## TODO List
+
+1. Update logic in `JobScraperJob` specifically `import_scrape_results!` to not be in a transaction, we can always safe the failures and try again or just report them back
+2. Add cron logic to run a job every hour that will query to find any and all `JobSearch`'s that are scheduled to run at that time and queue up the `JobScraperJob` for each one
