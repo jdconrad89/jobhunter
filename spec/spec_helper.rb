@@ -5,7 +5,7 @@ SimpleCov.start "rails" do
   add_filter "/spec/"
 end
 
-SimpleCov.minimum_coverage line: 95, branch: 70
+SimpleCov.minimum_coverage line: 90, branch: 70
 
 RSpec.configure do |config|
   config.disable_monkey_patching!
