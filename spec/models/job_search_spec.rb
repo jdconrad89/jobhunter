@@ -41,7 +41,7 @@ RSpec.describe JobSearch, type: :model do
 
   it "updates number_of_jobs via update_number_of_jobs!" do
     user = create_user!(email: "cnt@example.com")
-    job_search = create_job_search!(user: user, number_of_jobs: 0)
+    job_search = create_job_search!(user: user)
     company = create_company!(name: "Acme")
     create_job_post!(company: company, job_search: job_search, website: "https://example.com/one")
 

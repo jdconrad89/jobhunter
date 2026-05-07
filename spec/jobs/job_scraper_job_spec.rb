@@ -3,7 +3,7 @@ require "rails_helper"
 RSpec.describe JobScraperJob, type: :job do
   it "creates companies and job posts from scraper results without calling external API" do
     user = create_user!(email: "jsj@example.com")
-    job_search = create_job_search!(user: user, timezone: "UTC", board_relevance: [], number_of_jobs: 2)
+    job_search = create_job_search!(user: user, timezone: "UTC", board_relevance: [])
 
     posted_at = Time.current
     results = [
@@ -25,7 +25,7 @@ RSpec.describe JobScraperJob, type: :job do
 
   it "re-raises errors from the scraper (so retries can happen)" do
     user = create_user!(email: "jsj_err@example.com")
-    job_search = create_job_search!(user: user, timezone: "UTC", board_relevance: [], number_of_jobs: 1)
+    job_search = create_job_search!(user: user, timezone: "UTC", board_relevance: [])
 
     scraper = instance_double(JobScraper)
     allow(JobScraper).to receive(:new).and_return(scraper)
@@ -42,9 +42,10 @@ RSpec.describe JobScraperJob, type: :job do
     expect(JobScraper).not_to have_received(:new)
   end
 
+  # TODO: If/when we transition away from wrapping this logic in a transaction make sure we remove this test
   it "rolls back the full import when persistence fails mid-batch" do
     user = create_user!(email: "jsj_tx@example.com")
-    job_search = create_job_search!(user: user, timezone: "UTC", board_relevance: [], number_of_jobs: 2)
+    job_search = create_job_search!(user: user, timezone: "UTC", board_relevance: [])
 
     posted_at = Time.current
     results = [

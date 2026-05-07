@@ -2,8 +2,8 @@ require "rails_helper"
 
 RSpec.describe JobScraper do
   describe "#scrape" do
-    it "deduplicates results by title+company_name and respects number_of_jobs target" do
-      scraper = described_class.new(job_search: stub_job_search_for_job_scraper(number_of_jobs: 2))
+    it "deduplicates results by title+company_name" do
+      scraper = described_class.new(job_search: stub_job_search_for_job_scraper)
 
       page1 = {
         jobs_results: [
@@ -61,7 +61,7 @@ RSpec.describe JobScraper do
     end
 
     it "stops when jobs_results is nil" do
-      scraper = described_class.new(job_search: stub_job_search_for_job_scraper(number_of_jobs: 10))
+      scraper = described_class.new(job_search: stub_job_search_for_job_scraper)
       allow(scraper).to receive(:serpapi_response).and_return({ jobs_results: nil })
 
       expect(scraper.scrape).to eq([])
