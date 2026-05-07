@@ -73,9 +73,15 @@
         if (card.dataset.dragDisabled === "true") return;
         draggedCard = card;
         card.classList.add("job-app-card--dragging");
+        document.querySelectorAll(".job-app-card").forEach((c) => {
+          if (c !== card) c.classList.add("job-app-card--drop-through");
+        });
       });
       card.addEventListener("dragend", () => {
         card.classList.remove("job-app-card--dragging");
+        document.querySelectorAll(".job-app-card").forEach((c) => {
+          c.classList.remove("job-app-card--drop-through");
+        });
       });
     });
 
@@ -124,8 +130,10 @@
         zone.classList.add("job-apps-column__dropzone--over");
       });
 
-      zone.addEventListener("dragleave", () => {
-        zone.classList.remove("job-apps-column__dropzone--over");
+      zone.addEventListener("dragleave", (e) => {
+        if (!zone.contains(e.relatedTarget)) {
+          zone.classList.remove("job-apps-column__dropzone--over");
+        }
       });
 
       zone.addEventListener("drop", async (e) => {
