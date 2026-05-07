@@ -14,7 +14,7 @@ class JobScraper
 
     Rails.logger.info "Starting to scrape jobs for: #{@job_title}"
 
-    # TODO: Add logic to have a return number of jobs preference on job search separate from the 
+    # TODO: Add logic to have a return number of jobs preference on job search separate from the
     # existing number_of_jobs field that tracks number of jobs a search has found
     while response.length < 100
       current_response = serpapi_response(next_page_token: next_page_token)
