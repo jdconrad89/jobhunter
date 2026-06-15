@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Import to JobHunter</title>
+    <link rel="stylesheet" href="popup.css">
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>Import to JobHunter</h1>
+        <p class="subtitle">Review scraped fields, then save to your local app.</p>
+      </header>
+
+      <div id="loading" class="loading">Scraping this page…</div>
+
+      <form id="job-form" hidden>
+        <div class="field">
+          <label for="title">Title</label>
+          <input id="title" name="title" type="text" required>
+        </div>
+
+        <div class="field">
+          <label for="company_name">Company</label>
+          <input id="company_name" name="company_name" type="text" required>
+        </div>
+
+        <div class="field">
+          <label for="website">Job URL</label>
+          <input id="website" name="website" type="url" required>
+        </div>
+
+        <div class="field">
+          <label for="location">Location</label>
+          <input id="location" name="location" type="text">
+        </div>
+
+        <div class="field checkbox-row">
+          <input id="remote" name="remote" type="checkbox">
+          <label for="remote">Remote position</label>
+        </div>
+
+        <div class="field">
+          <label for="description">Description</label>
+          <textarea id="description" name="description" rows="6"></textarea>
+        </div>
+
+        <div class="actions">
+          <a class="button-link" href="#" id="open-options">Settings</a>
+          <button type="submit" class="primary" id="submit-btn">Save to JobHunter</button>
+        </div>
+      </form>
+
+      <div id="status" class="status" role="status"></div>
+    </div>
+
+    <script src="popup.js"></script>
+  </body>
+</html>

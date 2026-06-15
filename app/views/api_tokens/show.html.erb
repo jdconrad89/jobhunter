@@ -1,0 +1,46 @@
+<% content_for :head do %>
+  <%= stylesheet_link_tag "dashboard", "data-turbo-track": "reload" %>
+<% end %>
+
+<div class="dashboard-container">
+  <div class="dashboard-header">
+    <h1>Chrome Extension API Token</h1>
+  </div>
+
+  <div class="job-search-card" style="max-width: 640px;">
+    <p>Use this token to authenticate the JobHunter Chrome extension with your local server.</p>
+
+    <% unless @api_token_supported %>
+      <div class="flash flash--alert" role="alert">
+        The <code>api_token</code> column is missing. Run <code>bin/rails db:migrate</code> and restart the server.
+      </div>
+    <% else %>
+      <% if current_user.api_token.present? %>
+        <div style="margin: 1.5rem 0;">
+          <label for="api-token" style="display: block; font-weight: 600; margin-bottom: 0.5rem;">Your API token</label>
+          <input
+            id="api-token"
+            type="text"
+            readonly
+            value="<%= current_user.api_token %>"
+            style="width: 100%; font-family: monospace; padding: 0.75rem;"
+            onclick="this.select()"
+          >
+        </div>
+
+        <p>Send it as <code>Authorization: Bearer &lt;token&gt;</code> on requests to <code>POST /api/job_posts</code>.</p>
+
+        <%= form_with url: api_token_path, method: :post, local: true, class: "api-token-form", data: { turbo: false } do |f| %>
+          <%= f.submit "Regenerate Token",
+              class: "button-danger",
+              data: { turbo_confirm: "This will invalidate your current token. Continue?" } %>
+        <% end %>
+      <% else %>
+        <p>You do not have an API token yet.</p>
+        <%= form_with url: api_token_path, method: :post, local: true, class: "api-token-form", data: { turbo: false } do |f| %>
+          <%= f.submit "Generate Token", class: "button-primary" %>
+        <% end %>
+      <% end %>
+    <% end %>
+  </div>
+</div>

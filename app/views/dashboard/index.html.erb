@@ -20,12 +20,14 @@
         </div>
 
         <div class="card-actions">
-          <%= button_to "Trigger Search", 
-              trigger_job_search_path(job_search), 
-              method: :post,
-              class: "button-secondary",
-              data: { turbo_confirm: "Are you sure you want to trigger this job search now?" } %>
-          
+          <% unless job_search.manual? %>
+            <%= button_to "Trigger Search",
+                trigger_job_search_path(job_search),
+                method: :post,
+                class: "button-secondary",
+                data: { turbo_confirm: "Are you sure you want to trigger this job search now?" } %>
+          <% end %>
+
           <%= link_to "Edit", edit_job_search_path(job_search), class: "button-link" %>
           <%= button_to "Delete", 
               job_search_path(job_search), 

@@ -8,6 +8,11 @@ class JobScraperJob < ApplicationJob
       return
     end
 
+    if job_search.manual?
+      Rails.logger.info "JobScraperJob: skipping manual job search id=#{job_search_id}"
+      return
+    end
+
     Rails.logger.info "Starting job search for: #{job_search.job_title} in #{job_search.location}"
 
     begin

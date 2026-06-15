@@ -1,0 +1,46 @@
+{
+  "manifest_version": 3,
+  "name": "JobHunter",
+  "version": "0.4.1",
+  "description": "Import job postings from any page into your local JobHunter app.",
+  "permissions": ["storage", "activeTab", "tabs", "sidePanel"],
+  "host_permissions": [
+    "http://localhost/*/*",
+    "https://api.lever.co/*",
+    "https://boards-api.greenhouse.io/*",
+    "https://api.ashbyhq.com/*",
+    "https://*/*",
+    "http://*/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "Import to JobHunter"
+  },
+  "side_panel": {
+    "default_path": "sidepanel/sidepanel.html"
+  },
+  "options_ui": {
+    "page": "options/options.html",
+    "open_in_tab": true
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": [
+        "content/description-format.js",
+        "content/extractors/utils.js",
+        "content/extractors/json-ld.js",
+        "content/extractors/greenhouse.js",
+        "content/extractors/lever.js",
+        "content/extractors/ashby.js",
+        "content/extractors/linkedin.js",
+        "content/extractors/indeed.js",
+        "content/extractors/generic.js",
+        "content/content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ]
+}

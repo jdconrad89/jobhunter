@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Import to JobHunter</title>
+    <link rel="stylesheet" href="sidepanel.css">
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>Import to JobHunter</h1>
+        <p class="subtitle">This panel stays open while you browse. Your draft is saved automatically.</p>
+      </header>
+
+      <div id="loading" class="loading">Loading job details…</div>
+
+      <form id="job-form" hidden>
+        <div class="toolbar">
+          <button type="button" id="rescrape-btn" class="secondary">Re-scrape page</button>
+          <button type="button" id="clear-draft-btn" class="secondary">Clear draft</button>
+          <span id="source-label" class="source-label"></span>
+        </div>
+
+        <div class="field">
+          <label for="title">Title</label>
+          <input id="title" name="title" type="text" required>
+        </div>
+
+        <div class="field">
+          <label for="company_name">Company</label>
+          <input id="company_name" name="company_name" type="text" required>
+        </div>
+
+        <div class="field">
+          <label for="website">Job URL</label>
+          <input id="website" name="website" type="url" required>
+        </div>
+
+        <div class="field">
+          <label for="location">Location</label>
+          <input id="location" name="location" type="text">
+        </div>
+
+        <div class="field checkbox-row">
+          <input id="remote" name="remote" type="checkbox">
+          <label for="remote">Remote position</label>
+        </div>
+
+        <div class="field">
+          <label for="description">Description</label>
+          <textarea id="description" name="description" rows="14"></textarea>
+        </div>
+
+        <div class="actions">
+          <a class="button-link" href="#" id="open-options">Settings</a>
+          <button type="submit" class="primary" id="submit-btn">Save to JobHunter</button>
+        </div>
+      </form>
+
+      <div id="status" class="status" role="status"></div>
+    </div>
+
+    <script type="module" src="sidepanel.js"></script>
+  </body>
+</html>

@@ -40,6 +40,11 @@ class JobSearchesController < ApplicationController
   end
 
   def trigger
+    if @job_search.manual?
+      redirect_to dashboard_path, alert: "Manual job entries cannot be scraped."
+      return
+    end
+
     JobScraperJob.perform_later(@job_search.id)
     redirect_to dashboard_path, notice: "Job search has been triggered and will run shortly."
   end

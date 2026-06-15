@@ -19,32 +19,12 @@ class JobPostsController < ApplicationController
   end
 
   def create
-    permitted_params = job_post_params
-    company_name = permitted_params.delete(:company_name)
-    if company_name.to_s.strip.blank?
-      @job_post = JobPost.new(permitted_params)
-      @job_post.errors.add(:company, "name can't be blank")
-      return render :new, status: :unprocessable_entity
-    end
+    result = JobPosts::CreateManual.call(user: current_user, attributes: job_post_params)
 
-
-    company = Company.find_or_create_by(name: company_name.to_s.strip)
-    job_post_info = permitted_params
-    job_post_info[:company_id] = company.id
-
-    unless company.persisted?
-      @job_post = JobPost.new(job_post_info)
-      @job_post.errors.add(:company, company.errors.full_messages.to_sentence.presence || "is invalid")
-      return render :new, status: :unprocessable_entity
-    end
-
-    @job_post = JobPost.new(job_post_info)
-    @job_post.company = company
-    @job_post.job_search = manual_job_search_for_current_user
-
-    if @job_post.save
-      redirect_to job_post_path(@job_post), notice: "Job post created."
+    if result.success?
+      redirect_to job_post_path(result.job_post), notice: "Job post created."
     else
+      @job_post = result.job_post
       render :new, status: :unprocessable_entity
     end
   end
@@ -68,16 +48,6 @@ class JobPostsController < ApplicationController
       :remote,
       :company_name
     )
-  end
-
-  def manual_job_search_for_current_user
-    current_user.job_searches.find_or_create_by!(job_title: "Manual Job Entries") do |job_search|
-      job_search.language_code = "en"
-      job_search.timezone = Time.zone.name
-      job_search.location = "Anywhere"
-      job_search.remote = true
-      job_search.number_of_jobs = 0 if job_search.respond_to?(:number_of_jobs=)
-    end
   end
 
   def job_posts_per_page

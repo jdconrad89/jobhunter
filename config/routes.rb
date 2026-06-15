@@ -22,8 +22,10 @@ Rails.application.routes.draw do
   post "login", to: "sessions#create"
   delete "logout", to: "sessions#destroy"
 
+  resource :api_token, only: [ :show, :create ]
+
   namespace :api do
-    resources :job_posts, only: [ :index ]
+    resources :job_posts, only: [ :index, :create ]
   end
 
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html

@@ -42,6 +42,22 @@ RSpec.describe JobScraperJob, type: :job do
     expect(JobScraper).not_to have_received(:new)
   end
 
+  it "skips manual job searches" do
+    user = create_user!(email: "jsj_manual@example.com")
+    job_search = create_job_search!(
+      user: user,
+      job_title: JobSearch::MANUAL_JOB_SEARCH_TITLE,
+      timezone: "UTC",
+      board_relevance: []
+    )
+
+    allow(JobScraper).to receive(:new)
+
+    described_class.perform_now(job_search.id)
+
+    expect(JobScraper).not_to have_received(:new)
+  end
+
   # TODO: If/when we transition away from wrapping this logic in a transaction make sure we remove this test
   it "rolls back the full import when persistence fails mid-batch" do
     user = create_user!(email: "jsj_tx@example.com")

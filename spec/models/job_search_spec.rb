@@ -48,4 +48,13 @@ RSpec.describe JobSearch, type: :model do
     job_search.update_number_of_jobs!
     expect(job_search.reload.number_of_jobs).to eq(1)
   end
+
+  it "identifies the manual job search container" do
+    user = create_user!(email: "manual@example.com")
+    manual = create_job_search!(user: user, job_title: JobSearch::MANUAL_JOB_SEARCH_TITLE)
+    regular = create_job_search!(user: user, job_title: "Ruby Engineer")
+
+    expect(manual).to be_manual
+    expect(regular).not_to be_manual
+  end
 end

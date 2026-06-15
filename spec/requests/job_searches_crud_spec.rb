@@ -24,4 +24,24 @@ RSpec.describe "JobSearches CRUD", type: :request do
     expect(response).to redirect_to(dashboard_path)
     expect(JobSearch.where(id: job_search.id)).not_to exist
   end
+
+  it "does not trigger scraping for the manual job search" do
+    user = create_user!(email: "jscrud_manual@example.com")
+    sign_in_as(user)
+
+    manual_search = create_job_search!(
+      user: user,
+      job_title: JobSearch::MANUAL_JOB_SEARCH_TITLE,
+      timezone: "UTC",
+      board_relevance: []
+    )
+
+    expect {
+      post trigger_job_search_path(manual_search)
+    }.not_to have_enqueued_job(JobScraperJob)
+
+    expect(response).to redirect_to(dashboard_path)
+    follow_redirect!
+    expect(response.body).to include("Manual job entries cannot be scraped")
+  end
 end

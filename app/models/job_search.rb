@@ -1,4 +1,7 @@
 class JobSearch < ApplicationRecord
+  # Synthetic search used only to group manually added job posts (web form / extension).
+  MANUAL_JOB_SEARCH_TITLE = "Manual Job Entries"
+
   # Matches SerpAPI Google Jobs `apply_options` title strings (e.g. "LinkedIn", "Indeed").
   BOARD_RELEVANCE_ENTRY_MAX_LENGTH = 255
 
@@ -15,6 +18,10 @@ class JobSearch < ApplicationRecord
 
   def update_number_of_jobs!
     update_column(:number_of_jobs, job_posts.count)
+  end
+
+  def manual?
+    job_title == MANUAL_JOB_SEARCH_TITLE
   end
 
   private

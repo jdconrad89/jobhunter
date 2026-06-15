@@ -24,4 +24,14 @@ RSpec.describe User, type: :model do
     expect(user).not_to be_valid
     expect(user.errors[:email]).to be_present
   end
+
+  it "generates a unique api token" do
+    user = create_user!(email: "token@example.com")
+    user.regenerate_api_token!
+    expect(user.api_token).to be_present
+
+    other = create_user!(email: "token2@example.com")
+    other.regenerate_api_token!
+    expect(other.api_token).not_to eq(user.api_token)
+  end
 end
