@@ -31,5 +31,7 @@ module Jobhunter
       g.test_framework :rspec
       g.system_tests nil
     end
+
+    config.middleware.use Rack::Attack
   end
 end

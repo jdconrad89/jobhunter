@@ -6,6 +6,7 @@ class UsersController < ApplicationController
   def create
     @user = User.new(user_params)
     if @user.save
+      reset_session
       session[:user_id] = @user.id
       redirect_to dashboard_path, notice: "Account created successfully!"
     else

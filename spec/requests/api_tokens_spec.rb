@@ -16,15 +16,22 @@ RSpec.describe "ApiTokens", type: :request do
     expect(response.body).to include('action="/api_token"')
   end
 
-  it "generates an api token" do
+  it "generates an api token and shows it once" do
     user = create_user!(email: "token_create@example.com")
     sign_in_as(user)
 
     expect {
       post api_token_path
-    }.to change { user.reload.api_token }.from(nil)
+    }.to change { user.reload.api_token_configured? }.from(false).to(true)
 
     expect(response).to redirect_to(api_token_path)
-    expect(user.api_token).to be_present
+    follow_redirect!
+    expect(response.body).to include("Bearer")
+    expect(user.api_token_digest).to be_present
+    expect(user.api_token_digest).not_to include("=") # digest, not raw token
+
+    get api_token_path
+    expect(response.body).not_to match(/value="[A-Za-z0-9_-]{20,}"/)
+    expect(response.body).to include("only shown immediately after")
   end
 end

@@ -7,7 +7,7 @@ module Api
 
     def authenticate_api_token!
       token = request.authorization&.remove(/\ABearer /i)
-      @current_user = User.find_by(api_token: token) if token.present?
+      @current_user = User.authenticate_api_token(token)
 
       return if @current_user
 

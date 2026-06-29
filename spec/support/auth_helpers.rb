@@ -4,6 +4,7 @@ module AuthHelpers
   end
 
   def api_auth_headers(user)
-    { "Authorization" => "Bearer #{user.api_token}" }
+    token = user.instance_variable_get(:@plain_api_token) || user.regenerate_api_token!
+    { "Authorization" => "Bearer #{token}" }
   end
 end

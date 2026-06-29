@@ -47,6 +47,7 @@ gem "google_search_results"
 gem "sidekiq"
 
 gem "kaminari"
+gem "rack-attack"
 gem "rack-cors"
 
 group :development, :test do
