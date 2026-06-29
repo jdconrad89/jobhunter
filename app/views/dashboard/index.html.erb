@@ -28,12 +28,14 @@
                 data: { turbo_confirm: "Are you sure you want to trigger this job search now?" } %>
           <% end %>
 
-          <%= link_to "Edit", edit_job_search_path(job_search), class: "button-link" %>
-          <%= button_to "Delete", 
-              job_search_path(job_search), 
-              method: :delete,
-              class: "button-danger",
-              data: { turbo_confirm: "Are you sure you want to delete this job search?" } %>
+          <% unless job_search.manual? %>
+            <%= link_to "Edit", edit_job_search_path(job_search), class: "button-link" %>
+            <%= button_to "Delete",
+                job_search_path(job_search),
+                method: :delete,
+                class: "button-danger",
+                data: { turbo_confirm: "Are you sure you want to delete this job search?" } %>
+          <% end %>
         </div>
       </div>
     <% end %>

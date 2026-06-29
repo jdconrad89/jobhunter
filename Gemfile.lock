@@ -75,10 +75,6 @@ GEM
     addressable (2.8.7)
       public_suffix (>= 2.0.2, < 7.0)
     ast (2.4.3)
-    babel-source (5.8.35)
-    babel-transpiler (0.7.0)
-      babel-source (>= 4.0, < 6)
-      execjs (~> 2.0)
     base64 (0.3.0)
     bcrypt (3.1.20)
     bcrypt_pbkdf (1.1.2)
@@ -116,7 +112,6 @@ GEM
     erubi (1.13.1)
     et-orbi (1.2.11)
       tzinfo
-    execjs (2.10.0)
     fugit (1.11.1)
       et-orbi (~> 1, >= 1.2.11)
       raabro (~> 1.4)
@@ -137,8 +132,6 @@ GEM
     jbuilder (2.13.0)
       actionview (>= 5.0.0)
       activesupport (>= 5.0.0)
-    jsbundling-rails (1.3.1)
-      railties (>= 6.0.0)
     json (2.12.2)
     kamal (2.6.1)
       activesupport (>= 7.0)
@@ -243,8 +236,6 @@ GEM
     rack-cors (3.0.0)
       logger
       rack (>= 3.0.14)
-    rack-proxy (0.7.7)
-      rack
     rack-session (2.1.1)
       base64 (>= 0.1.0)
       rack (>= 3.0.0)
@@ -286,12 +277,6 @@ GEM
     rdoc (6.14.0)
       erb
       psych (>= 4.0.0)
-    react-rails (3.2.1)
-      babel-transpiler (>= 0.7.0)
-      connection_pool
-      execjs
-      railties (>= 3.2)
-      tilt
     redis-client (0.24.0)
       connection_pool
     regexp_parser (2.10.0)
@@ -352,7 +337,6 @@ GEM
       rexml (~> 3.2, >= 3.2.5)
       rubyzip (>= 1.2.2, < 3.0)
       websocket (~> 1.0)
-    semantic_range (3.1.0)
     sidekiq (8.0.4)
       connection_pool (>= 2.5.0)
       json (>= 2.9.0)
@@ -381,14 +365,6 @@ GEM
       fugit (~> 1.11.0)
       railties (>= 7.1)
       thor (~> 1.3.1)
-    sprockets (4.2.2)
-      concurrent-ruby (~> 1.0)
-      logger
-      rack (>= 2.2.4, < 4)
-    sprockets-rails (3.5.2)
-      actionpack (>= 6.1)
-      activesupport (>= 6.1)
-      sprockets (>= 3.0.0)
     sshkit (1.24.0)
       base64
       logger
@@ -405,7 +381,6 @@ GEM
     thruster (0.1.13-arm64-darwin)
     thruster (0.1.13-x86_64-darwin)
     thruster (0.1.13-x86_64-linux)
-    tilt (2.6.0)
     timeout (0.4.3)
     turbo-rails (2.0.16)
       actionpack (>= 7.1.0)
@@ -422,11 +397,6 @@ GEM
       activemodel (>= 6.0.0)
       bindex (>= 0.4.0)
       railties (>= 6.0.0)
-    webpacker (5.4.4)
-      activesupport (>= 5.2)
-      rack-proxy (>= 0.6.1)
-      railties (>= 5.2)
-      semantic_range (>= 2.3.0)
     websocket (1.2.11)
     websocket-driver (0.8.0)
       base64
@@ -458,7 +428,6 @@ DEPENDENCIES
   google_search_results
   importmap-rails
   jbuilder
-  jsbundling-rails
   kamal
   kaminari
   pg (>= 1.1)
@@ -468,7 +437,6 @@ DEPENDENCIES
   puma (>= 5.0)
   rack-cors
   rails (~> 8.0.1)
-  react-rails
   rspec-rails
   rubocop-rails-omakase
   selenium-webdriver
@@ -477,13 +445,11 @@ DEPENDENCIES
   solid_cable
   solid_cache
   solid_queue
-  sprockets-rails
   stimulus-rails
   thruster
   turbo-rails
   tzinfo-data
   web-console
-  webpacker (~> 5.4)
 
 BUNDLED WITH
    2.5.22

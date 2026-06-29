@@ -15,6 +15,10 @@ RSpec.describe "JobSearches CRUD", type: :request do
     expect(response).to redirect_to(dashboard_path)
     expect(job_search.reload.job_title).to eq("Ruby 2")
 
+    get edit_job_search_path(job_search)
+    expect(response).to have_http_status(:success)
+    expect(response.body).to include("Edit Job Search")
+
     expect {
       post trigger_job_search_path(job_search)
     }.to have_enqueued_job(JobScraperJob).with(job_search.id)
@@ -43,5 +47,22 @@ RSpec.describe "JobSearches CRUD", type: :request do
     expect(response).to redirect_to(dashboard_path)
     follow_redirect!
     expect(response.body).to include("Manual job entries cannot be scraped")
+  end
+
+  it "blocks editing the manual job search" do
+    user = create_user!(email: "jscrud_edit_manual@example.com")
+    sign_in_as(user)
+
+    manual_search = create_job_search!(
+      user: user,
+      job_title: JobSearch::MANUAL_JOB_SEARCH_TITLE,
+      timezone: "UTC",
+      board_relevance: []
+    )
+
+    get edit_job_search_path(manual_search)
+    expect(response).to redirect_to(dashboard_path)
+    follow_redirect!
+    expect(response.body).to include("Manual job entries cannot be edited or deleted")
   end
 end

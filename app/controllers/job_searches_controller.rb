@@ -1,6 +1,7 @@
 class JobSearchesController < ApplicationController
   before_action :require_login
   before_action :set_job_search, only: [ :show, :edit, :update, :destroy, :trigger ]
+  before_action :reject_manual_job_search_changes, only: [ :edit, :update, :destroy ]
 
   def index
     @job_searches = current_user.job_searches
@@ -59,5 +60,11 @@ class JobSearchesController < ApplicationController
     permitted_params = params.require(:job_search).permit(:job_title, :location, :remote, :language_code, :runtime, :timezone, board_relevance: [])
     permitted_params[:board_relevance] = permitted_params[:board_relevance].reject(&:blank?) if permitted_params[:board_relevance].present?
     permitted_params
+  end
+
+  def reject_manual_job_search_changes
+    return unless @job_search.manual?
+
+    redirect_to dashboard_path, alert: "Manual job entries cannot be edited or deleted."
   end
 end

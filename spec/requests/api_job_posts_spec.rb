@@ -2,17 +2,31 @@ require "rails_helper"
 
 RSpec.describe "Api::JobPosts", type: :request do
   describe "GET /api/job_posts" do
-    it "returns json including company" do
+    it "returns the authenticated user's job posts including company" do
       user = create_user!(email: "api@example.com")
+      user.regenerate_api_token!
+      other = create_user!(email: "api_other@example.com")
+
       job_search = create_job_search!(user: user)
       company = create_company!(name: "Acme")
       create_job_post!(company: company, job_search: job_search, website: "https://example.com/api")
 
-      get api_job_posts_path
+      other_search = create_job_search!(user: other)
+      other_company = create_company!(name: "OtherCo")
+      create_job_post!(company: other_company, job_search: other_search, website: "https://example.com/other")
+
+      get api_job_posts_path, headers: api_auth_headers(user)
       expect(response).to have_http_status(:success)
       body = JSON.parse(response.body)
       expect(body).to be_a(Array)
+      expect(body.length).to eq(1)
       expect(body.first["company"]).to include("name" => "Acme")
+    end
+
+    it "returns unauthorized without a token" do
+      get api_job_posts_path
+      expect(response).to have_http_status(:unauthorized)
+      expect(JSON.parse(response.body)).to eq("error" => "Unauthorized")
     end
   end
 

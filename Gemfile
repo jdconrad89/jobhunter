@@ -46,13 +46,6 @@ gem "google_search_results"
 # Background job processing
 gem "sidekiq"
 
-# React and frontend
-gem "jsbundling-rails"
-gem "react-rails"
-gem "sprockets-rails"
-
-gem "webpacker", "~> 5.4"
-
 gem "kaminari"
 gem "rack-cors"
 

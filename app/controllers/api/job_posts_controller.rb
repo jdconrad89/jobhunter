@@ -1,9 +1,12 @@
 module Api
   class JobPostsController < BaseController
-    skip_before_action :authenticate_api_token!, only: [ :index ]
-
     def index
-      @job_posts = JobPost.includes(:company).all
+      @job_posts = JobPost
+        .joins(:job_search)
+        .includes(:company)
+        .where(job_searches: { user_id: current_user.id })
+        .order(created_at: :desc)
+
       render json: @job_posts.as_json(
         include: { company: { only: [ :id, :name ] } },
         except: [ :created_at, :updated_at ]
