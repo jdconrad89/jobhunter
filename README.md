@@ -9,7 +9,7 @@ This document walks through how the major pieces fit together: models, concerns,
 ## Tech stack
 
 - **Ruby on Rails 8** with **PostgreSQL**
-- **Authentication**: session-based login with `has_secure_password` (`bcrypt`)
+- **Authentication**: sesion-based login with `has_secure_password` (`bcrypt`)
 - **Background work**: **Sidekiq** in development (see `config/application.rb`). **Production** is configured to use **Solid Queue** (`config/environments/production.rb`); adjust if you standardize on one adapter everywhere.
 - **Pagination**: Kaminari (`JobPost` index)
 - **External API**: [SerpAPI](https://serpapi.com) Google Jobs (`google_search_results` gem, `ENV["SERPAPI_API_KEY"]`)
@@ -46,7 +46,7 @@ flowchart LR
 
 ### `JobSearch` (`app/models/job_search.rb`)
 
-Represents **one configured scrape**: title query, optional location, remote flag, language, timezone, optional daily `**runtime`** (time of day stored on the record), and `**board_relevance**`.
+Represents **one configured scrape**: title query, optional location, remote flag, language, timezone, optional daily `**runtime`** (time of day stored on the record), and `**board_relevance`**.
 
 - `**board_relevance**`: an ordered list of **job board names** as they appear on Google Jobs “apply” options (e.g. `LinkedIn`, `Indeed`). The scraper uses this to prefer certain apply links when multiple exist—not URLs.
 - Validations enforce language code shape, timezone name, and sensible `board_relevance` entries (non-blank strings, max length).
@@ -61,7 +61,7 @@ Represents **one configured scrape**: title query, optional location, remote fla
 
 Core listing record: title, website (apply URL), description, location, remote, `posted_at`, denormalized **pay** and **experience** numeric columns for filtering.
 
-- **Filtering the index** is delegated to `**JobPosts::Filter`** (`app/models/job_posts/filter.rb`): company name (ILIKE), remote, contract vs full-time heuristics, pay range, experience range. `**JobPostsController**` permits only filter keys, then `**JobPost.filtered(...)**` applies them.
+- **Filtering the index** is delegated to `**JobPosts::Filter`** (`app/models/job_posts/filter.rb`): company name (ILIKE), remote, contract vs full-time heuristics, pay range, experience range. `**JobPostsController`** permits only filter keys, then `**JobPost.filtered(...)**` applies them.
 - **Description-derived behavior** lives in concerns (see below): pay/experience parsing, skills, contract detection, `**suggested_jobs`**.
 - **Callbacks**: default `posted_at` on create; before save, populate `pay_range_*` and `experience_years_*` from description text; after save/destroy, refresh parent search’s `number_of_jobs`.
 
@@ -69,7 +69,7 @@ Core listing record: title, website (apply URL), description, location, remote, 
 
 - One row per user per job post (`uniqueness` on `job_post_id` scoped to `user_id`).
 - `**JobApplication::STATUSES`**: `applied`, `interviewing`, `rejected`, `ghosted`—single source of truth for validation and UI.
-- `**applied_at**` required; defaults set on create.
+- `**applied_at`** required; defaults set on create.
 - **Manual “ghosted”**: the HTML form sends `**mark_as_ghosted`**; the controller merges that with nested `job_application` params so ghosting is explicit, not time-based.
 
 ---
@@ -83,7 +83,7 @@ Included by `JobPost`. Holds regex dictionaries and logic to:
 - Extract and parse **salary ranges** from description text into `pay_range_min` / `pay_range_max`.
 - Extract **years of experience** (numeric and word-based phrases) into `experience_years_min` / `experience_years_max`.
 - `**contract?`**: heuristic on title + description.
-- `**extracted_skills**`: keyword/regex map (Ruby, Rails, React, AWS, etc.) for light skill tagging.
+- `**extracted_skills`**: keyword/regex map (Ruby, Rails, React, AWS, etc.) for light skill tagging.
 
 ### `JobPost::SimilarListings` (`app/models/concerns/job_post/similar_listings.rb`)
 
@@ -91,7 +91,7 @@ Included by `JobPost`. Holds regex dictionaries and logic to:
 
 ### `JobPosts::Filter` (`app/models/job_posts/filter.rb`)
 
-- PORO invoked as `**JobPosts::Filter.call(filter_params)`** with a **Hash** (or permitted params converted via `**to_h`**) already allowlisted in `**JobPostsController#job_post_filter_params**`. Builds an `ActiveRecord::Relation` with joins/scopes; does not call `**permit**` itself.
+- PORO invoked as `**JobPosts::Filter.call(filter_params)`** with a **Hash** (or permitted params converted via `**to_h`**) already allowlisted in `**JobPostsController#job_post_filter_params`**. Builds an `ActiveRecord::Relation` with joins/scopes; does not call `**permit**` itself.
 
 ---
 
@@ -110,7 +110,7 @@ Included by `JobPost`. Holds regex dictionaries and logic to:
 ### `JobScraperJob` (`app/jobs/job_scraper_job.rb`)
 
 - `**perform(job_search_id)`** enqueues only an ID (not the full `JobSearch` record).
-- Loads the search; sets `Time.zone` from the search’s timezone; runs `**JobScraper**`, then `**import_scrape_results!**`.
+- Loads the search; sets `Time.zone` from the search’s timezone; runs `**JobScraper`**, then `**import_scrape_results!**`.
 - `**import_scrape_results!**` wraps all `**Company**` / `**JobPost**` creates in a **single transaction** so a failure mid-import does not leave a partial batch.
 - `**find_or_create_by!`** on posts keys on `job_search`, `title`, `company`, `website`; the block sets description, location, remote, `posted_at` only when **creating** a new row.
 - Errors are logged and **re-raised** so the queue can retry (per your Sidekiq / Solid Queue policy).
@@ -125,7 +125,7 @@ Standard Rails base class for shared job configuration (retries, etc., if you ad
 
 ### `ApplicationController`
 
-- `**current_user`** from `session[:user_id]`; `**require_login**` redirects to login.
+- `**current_user`** from `session[:user_id]`; `**require_login`** redirects to login.
 - `**allow_browser versions: :modern**` (Rails default for modern-only features).
 
 ### `SessionsController` / `UsersController`
@@ -139,7 +139,7 @@ Sign in, sign out, registration (`signup`).
 ### `JobSearchesController`
 
 - Full CRUD for **JobSearch** (nested under the current user).
-- `**trigger`** (`POST …/job_searches/:id/trigger`): enqueues `**JobScraperJob.perform_later(job_search.id)**`.
+- `**trigger`** (`POST …/job_searches/:id/trigger`): enqueues `**JobScraperJob.perform_later(job_search.id)`**.
 
 ### `JobPostsController`
 
@@ -149,7 +149,7 @@ Sign in, sign out, registration (`signup`).
 
 ### `JobApplicationsController`
 
-- `**create`**: nested under `**job_posts**`—“I applied to this post.”
+- `**create`**: nested under `**job_posts`**—“I applied to this post.”
 - `**index**`: board grouped by `**JobApplication::STATUSES**`.
 - `**show` / `edit**`: same form template; updates status, contact info, followed-up flag.
 - `**update**`: accepts top-level JSON params (`status`, `followed_up`) for drag-and-drop / checkboxes, or nested `job_application` for the form; validates status against `**JobApplication::STATUSES**`; merges `**mark_as_ghosted**` for HTML ghosting.
@@ -250,10 +250,10 @@ bin/dev   # or rails s + separate JS watcher, plus Sidekiq as needed
 
 If you extend the app, prefer new **service objects** for integrations, **query objects** under `app/models/.../filter.rb` (or `app/queries`) for complex reads, and **jobs** only for async orchestration and retries.
 
-
 ---
 
 ## TODO List
 
 1. Update logic in `JobScraperJob` specifically `import_scrape_results!` to not be in a transaction, we can always safe the failures and try again or just report them back
 2. Add cron logic to run a job every hour that will query to find any and all `JobSearch`'s that are scheduled to run at that time and queue up the `JobScraperJob` for each one
+

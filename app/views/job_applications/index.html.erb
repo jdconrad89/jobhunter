@@ -26,6 +26,7 @@
 
               <dl class="job-app-card__details">
                 <div><dt>Company</dt><dd><%= job.company.name %></dd></div>
+                <div><dt>Applied</dt><dd><%= application.applied_at.strftime("%B %d, %Y") %></dd></div>
                 <div><dt>Location</dt><dd><%= job.location.presence || "—" %></dd></div>
                 <div><dt>Remote</dt><dd><%= job.remote ? "Yes" : "No" %></dd></div>
                 <div>

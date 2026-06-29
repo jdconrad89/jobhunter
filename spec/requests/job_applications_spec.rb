@@ -8,10 +8,11 @@ RSpec.describe "JobApplications", type: :request do
     job_search = create_job_search!(user: user)
     company = create_company!
     post_record = create_job_post!(company: company, job_search: job_search, website: "https://example.com/idx")
-    JobApplication.create!(user: user, job_post: post_record, status: "applied", applied_at: Time.current)
+    JobApplication.create!(user: user, job_post: post_record, status: "applied", applied_at: Time.zone.parse("2026-01-15 12:00"))
 
     get job_applications_path
     expect(response).to have_http_status(:success)
+    expect(response.body).to include("January 15, 2026")
   end
 
   it "creates an application for a job post" do

@@ -14,6 +14,7 @@ Rails.application.routes.draw do
   resources :job_applications, only: [ :index, :show, :edit, :update ]
 
   get "dashboard", to: "dashboard#index"
+  get "analytics", to: "analytics#index"
 
   get "signup", to: "users#new"
   post "signup", to: "users#create"
