@@ -90,5 +90,12 @@ RSpec.describe JobPost, type: :model do
       post = make_post(description: "")
       expect(ApplicationController.helpers.job_post_description_with_highlighted_pay(post)).to eq("")
     end
+
+    it "strips script tags from description output" do
+      post = make_post(description: "<script>alert('xss')</script>\nHello")
+      html = ApplicationController.helpers.job_post_description_with_highlighted_pay(post)
+      expect(html).not_to include("<script>")
+      expect(html).to include("Hello")
+    end
   end
 end

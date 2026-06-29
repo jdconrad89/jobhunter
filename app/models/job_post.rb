@@ -8,6 +8,7 @@ class JobPost < ApplicationRecord
 
   validates :title, presence: true
   validates :website, presence: true
+  validate :website_must_be_http_url
 
   before_validation :set_default_posted_at, on: :create
   before_save :populate_pay_range_numbers
@@ -64,5 +65,11 @@ class JobPost < ApplicationRecord
 
   def set_default_posted_at
     self.posted_at ||= Time.current
+  end
+
+  def website_must_be_http_url
+    return if website.blank?
+
+    errors.add(:website, "must be a valid http or https URL") unless JobPosts::SafeUrl.http_url?(website)
   end
 end
