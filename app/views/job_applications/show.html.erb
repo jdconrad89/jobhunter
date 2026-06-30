@@ -10,8 +10,8 @@
     </div>
 
     <div class="job-app-show__header-actions">
-      <%= link_to "Back to Board", job_applications_path, class: "button-secondary" %>
-      <%= link_to "View Job", job_post_path(@job_application.job_post), class: "button-link" %>
+      <%= link_to "Back to Board", job_applications_path, class: "job-app-show__btn job-app-show__btn--secondary" %>
+      <%= link_to "View Job", job_post_path(@job_application.job_post), class: "job-app-show__btn job-app-show__btn--link" %>
     </div>
   </div>
 
@@ -41,7 +41,7 @@
       </div>
 
       <div class="job-app-show__actions">
-        <%= f.submit "Save", class: "button-primary" %>
+        <%= f.submit "Save", class: "job-app-show__submit" %>
       </div>
     <% end %>
   </div>

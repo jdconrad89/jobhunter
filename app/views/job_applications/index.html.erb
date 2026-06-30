@@ -3,23 +3,36 @@
 <% end %>
 
 <div class="job-apps-board">
-  <div class="job-apps-board__header">
-    <h1 class="job-apps-board__title">Application Tracker</h1>
-    <p class="job-apps-board__subtitle">Drag cards between columns to update status.</p>
-  </div>
+  <header class="job-apps-board__header">
+    <div>
+      <h1 class="job-apps-board__title">Application Tracker</h1>
+      <p class="job-apps-board__subtitle">Drag cards between columns to update status.</p>
+    </div>
+    <%= link_to "Browse Jobs", job_posts_path, class: "job-apps-board__cta" %>
+  </header>
 
   <div class="job-apps-board__columns">
     <% JobApplication::STATUSES.each do |status| %>
+      <% applications = @job_applications_by_status[status] || [] %>
       <section class="job-apps-column" data-status="<%= status %>">
         <header class="job-apps-column__header">
           <h2><%= status.humanize %></h2>
-          <span class="job-apps-column__count"><%= (@job_applications_by_status[status] || []).size %></span>
+          <span class="job-apps-column__count"><%= applications.size %></span>
         </header>
 
         <div class="job-apps-column__dropzone" data-status="<%= status %>">
-          <% (@job_applications_by_status[status] || []).each do |application| %>
+          <% applications.each do |application| %>
             <% job = application.job_post %>
             <article class="job-app-card" draggable="true" data-application-id="<%= application.id %>">
+              <div class="job-app-card__badges">
+                <% if job.remote %>
+                  <span class="job-app-card__badge job-app-card__badge--remote">Remote</span>
+                <% end %>
+                <% if job.location.present? %>
+                  <span class="job-app-card__badge job-app-card__badge--location"><%= job.location %></span>
+                <% end %>
+              </div>
+
               <h3 class="job-app-card__title">
                 <%= link_to job.title, job_post_path(job) %>
               </h3>
@@ -57,6 +70,9 @@
                 <%= link_to "Details", job_application_path(application), class: "job-app-card__link" %>
               </div>
             </article>
+          <% end %>
+          <% if applications.empty? %>
+            <p class="job-apps-column__empty">No applications in this column</p>
           <% end %>
         </div>
       </section>
