@@ -76,9 +76,9 @@ class JobScraper
     return nil if sorted_links.empty?
 
     uri = URI.parse(sorted_links.first[:link])
-    query_params = CGI.parse(uri.query.to_s)
-    filtered_params = query_params.reject { |key| key.start_with?("utm") }
-    uri.query = URI.encode_www_form(filtered_params)
+    query_pairs = URI.decode_www_form(uri.query.to_s)
+    filtered_pairs = query_pairs.reject { |key, _| key.start_with?("utm") }
+    uri.query = URI.encode_www_form(filtered_pairs).presence
 
     uri.to_s
   end

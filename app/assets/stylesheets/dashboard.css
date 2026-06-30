@@ -1,64 +1,360 @@
-.applications-section {
-  margin-top: 2rem;
-  padding: 1rem;
+/* Dashboard */
+
+.dashboard-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 3rem;
 }
 
-.applications-section h2 {
-  margin-bottom: 1.5rem;
-  color: #2c3e50;
+.dashboard-page__header,
+.dashboard-applications__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 2rem;
 }
 
-.applications-grid {
+.dashboard-page__title,
+.dashboard-applications__title {
+  margin: 0 0 0.35rem;
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  letter-spacing: -0.025em;
+}
+
+.dashboard-applications__title {
+  font-size: 1.5rem;
+}
+
+.dashboard-page__subtitle,
+.dashboard-applications__subtitle {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.95rem;
+}
+
+.dashboard-page__cta {
+  flex-shrink: 0;
+  text-decoration: none;
+  background: #0d9488;
+  color: #fff;
+  font-size: 0.88rem;
+  font-weight: 600;
+  padding: 0.5rem 0.8rem;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.dashboard-page__cta:hover {
+  background: #0f766e;
+}
+
+.dashboard-page__cta--secondary {
+  background: #fff;
+  color: #0d9488;
+  border: 1px solid #0d9488;
+}
+
+.dashboard-page__cta--secondary:hover {
+  background: #f0fdfa;
+}
+
+.dashboard-page__grid,
+.dashboard-applications__grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
   gap: 1.5rem;
 }
 
-.application-card {
-  background-color: white;
-  border-radius: 0.5rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+/* Job search cards */
+
+.job-search-card {
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border: 1px solid #dbe5f1;
+  border-radius: 12px;
   padding: 1.5rem;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
 
-.application-card .card-header {
+.job-search-card:hover {
+  border-color: #0d9488;
+  box-shadow: 0 8px 24px rgba(13, 148, 136, 0.12);
+  transform: translateY(-2px);
+}
+
+.job-search-card__header {
   margin-bottom: 1rem;
 }
 
-.application-card h3 {
-  margin: 0 0 0.5rem 0;
-  color: #2c3e50;
-  font-size: 1.2rem;
+.job-search-card__title {
+  margin: 0 0 0.5rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1a1a2e;
+  line-height: 1.4;
 }
 
-.application-card .company {
-  color: #666;
+.job-search-card__badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+}
+
+.job-search-card__badge--location {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.job-search-card__details {
+  margin: 0 0 1.25rem;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem 1rem;
+  flex: 1;
+}
+
+.job-search-card__details dt {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.job-search-card__details dd {
+  margin: 0.15rem 0 0;
   font-size: 0.9rem;
+  color: #0f172a;
 }
 
-.application-card .card-details {
-  margin-bottom: 1.5rem;
-}
-
-.application-card .card-details p {
-  margin: 0.5rem 0;
-  color: #666;
-}
-
-.application-card .card-details strong {
-  color: #2c3e50;
-}
-
-.application-card .card-actions {
+.job-search-card__actions {
   display: flex;
-  gap: 1rem;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  align-items: center;
+  padding-top: 1rem;
+  border-top: 1px solid #f1f5f9;
 }
 
-.no-applications {
-  text-align: center;
-  color: #666;
+.job-search-card__btn {
+  padding: 0.45rem 0.85rem;
+  border-radius: 8px;
+  border: none;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.15s;
+}
+
+.job-search-card__btn:hover {
+  transform: translateY(-1px);
+}
+
+.job-search-card__btn--primary {
+  background: #0d9488;
+  color: #fff;
+}
+
+.job-search-card__btn--primary:hover {
+  background: #0f766e;
+}
+
+.job-search-card__btn--danger {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.job-search-card__btn--danger:hover {
+  background: #fee2e2;
+}
+
+.job-search-card__link {
+  color: #0d9488;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.job-search-card__link:hover {
+  text-decoration: underline;
+}
+
+.job-search-card__manual-label {
+  font-size: 0.85rem;
+  color: #64748b;
   font-style: italic;
-  padding: 2rem;
-  background-color: #f8f9fa;
-  border-radius: 0.5rem;
-} 
+}
+
+/* Applications preview */
+
+.dashboard-applications {
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.dashboard-app-card {
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border: 1px solid #dbe5f1;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.dashboard-app-card:hover {
+  border-color: #0d9488;
+  box-shadow: 0 8px 24px rgba(13, 148, 136, 0.12);
+  transform: translateY(-2px);
+}
+
+.dashboard-app-card__header {
+  margin-bottom: 0.75rem;
+}
+
+.dashboard-app-card__title {
+  margin: 0 0 0.35rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #1a1a2e;
+  line-height: 1.4;
+}
+
+.dashboard-app-card__company {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #0d9488;
+}
+
+.dashboard-app-card__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.85rem;
+}
+
+.dashboard-app-card__badge {
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+}
+
+.dashboard-app-card__badge--applied {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.dashboard-app-card__badge--interviewing {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.dashboard-app-card__badge--rejected {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.dashboard-app-card__badge--ghosted {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.dashboard-app-card__badge--remote {
+  background: #ccfbf1;
+  color: #0f766e;
+}
+
+.dashboard-app-card__badge--location {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.dashboard-app-card__details {
+  margin: 0 0 1rem;
+  display: grid;
+  gap: 0.35rem;
+  flex: 1;
+}
+
+.dashboard-app-card__details dt {
+  font-size: 0.72rem;
+  color: #64748b;
+}
+
+.dashboard-app-card__details dd {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #0f172a;
+}
+
+.dashboard-app-card__actions {
+  display: flex;
+  gap: 0.85rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid #f1f5f9;
+}
+
+.dashboard-app-card__link {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #0d9488;
+  text-decoration: none;
+}
+
+.dashboard-app-card__link:hover {
+  text-decoration: underline;
+}
+
+.dashboard-app-card__link--muted {
+  color: #64748b;
+}
+
+.dashboard-app-card__link--muted:hover {
+  color: #0d9488;
+}
+
+.dashboard-empty {
+  text-align: center;
+  padding: 2.5rem 1.5rem;
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  border-radius: 12px;
+}
+
+.dashboard-empty p {
+  margin: 0 0 1.25rem;
+  color: #64748b;
+}
+
+/* API token page reuses dashboard shell */
+
+.dashboard-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+}
+
+.dashboard-header h1 {
+  margin: 0 0 1.5rem;
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  letter-spacing: -0.025em;
+}
+
+.api-token-form {
+  margin-top: 1rem;
+}

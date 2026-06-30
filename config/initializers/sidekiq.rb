@@ -1,3 +1,6 @@
+# Sidekiq is optional in development (see JOB_QUEUE_ADAPTER). Production uses Solid Queue.
+return unless Rails.application.config.active_job.queue_adapter == :sidekiq
+
 require "sidekiq"
 
 Sidekiq.configure_server do |config|

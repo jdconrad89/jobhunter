@@ -1,73 +1,116 @@
-<div class="dashboard-container">
-  <div class="dashboard-header">
-    <h1>Your Job Searches</h1>
-    <%= link_to "New Job Search", new_job_search_path, class: "button-primary" %>
-  </div>
+<% content_for :head do %>
+  <%= stylesheet_link_tag "dashboard", "data-turbo-track": "reload" %>
+<% end %>
 
-  <div class="job-searches-grid">
+<div class="dashboard-page">
+  <header class="dashboard-page__header">
+    <div>
+      <h1 class="dashboard-page__title">Your Job Searches</h1>
+      <p class="dashboard-page__subtitle">Manage automated searches and review recent applications.</p>
+    </div>
+    <%= link_to "New Job Search", new_job_search_path, class: "dashboard-page__cta" %>
+  </header>
+
+  <div class="dashboard-page__grid">
     <% @job_searches.each do |job_search| %>
-      <div class="job-search-card">
-        <div class="card-header">
-          <h3><%= job_search.job_title %></h3>
-          <span class="location"><%= job_search.location %></span>
+      <article class="job-search-card">
+        <div class="job-search-card__header">
+          <h2 class="job-search-card__title"><%= job_search.job_title %></h2>
+          <% if job_search.location.present? %>
+            <span class="job-search-card__badge job-search-card__badge--location"><%= job_search.location %></span>
+          <% end %>
         </div>
 
-        <div class="card-details">
-          <p><strong>Remote:</strong> <%= job_search.remote ? "Yes" : "No" %></p>
-          <p><strong>Language:</strong> <%= job_search.language_code %></p>
-          <p><strong>Run Time:</strong> <%= job_search.runtime&.strftime("%I:%M %p") %></p>
-          <p><strong>Timezone:</strong> <%= job_search.timezone %></p>
-        </div>
+        <dl class="job-search-card__details">
+          <div>
+            <dt>Remote</dt>
+            <dd><%= job_search.remote ? "Yes" : "No" %></dd>
+          </div>
+          <div>
+            <dt>Language</dt>
+            <dd><%= job_search.language_code %></dd>
+          </div>
+          <div>
+            <dt>Run time</dt>
+            <dd><%= job_search.runtime&.strftime("%I:%M %p") || "—" %></dd>
+          </div>
+          <div>
+            <dt>Timezone</dt>
+            <dd><%= job_search.timezone %></dd>
+          </div>
+        </dl>
 
-        <div class="card-actions">
+        <div class="job-search-card__actions">
           <% unless job_search.manual? %>
             <%= button_to "Trigger Search",
                 trigger_job_search_path(job_search),
                 method: :post,
-                class: "button-secondary",
+                class: "job-search-card__btn job-search-card__btn--primary",
                 data: { turbo_confirm: "Are you sure you want to trigger this job search now?" } %>
-          <% end %>
-
-          <% unless job_search.manual? %>
-            <%= link_to "Edit", edit_job_search_path(job_search), class: "button-link" %>
+            <%= link_to "Edit", edit_job_search_path(job_search), class: "job-search-card__link" %>
             <%= button_to "Delete",
                 job_search_path(job_search),
                 method: :delete,
-                class: "button-danger",
+                class: "job-search-card__btn job-search-card__btn--danger",
                 data: { turbo_confirm: "Are you sure you want to delete this job search?" } %>
+          <% else %>
+            <span class="job-search-card__manual-label">Manual entry search</span>
           <% end %>
         </div>
-      </div>
+      </article>
     <% end %>
   </div>
 
-  <div class="applications-section">
-    <h2>Your Job Applications</h2>
+  <section class="dashboard-applications">
+    <header class="dashboard-applications__header">
+      <div>
+        <h2 class="dashboard-applications__title">Recent Applications</h2>
+        <p class="dashboard-applications__subtitle">Track pipeline status on the application board.</p>
+      </div>
+      <%= link_to "Application Board", job_applications_path, class: "dashboard-page__cta dashboard-page__cta--secondary" %>
+    </header>
+
     <% if @job_applications.any? %>
-      <div class="applications-grid">
+      <div class="dashboard-applications__grid">
         <% @job_applications.each do |application| %>
-          <div class="application-card">
-            <div class="card-header">
-              <h3><%= application.job_post.title %></h3>
-              <span class="company"><%= application.job_post.company.name %></span>
+          <% job = application.job_post %>
+          <article class="dashboard-app-card">
+            <div class="dashboard-app-card__header">
+              <h3 class="dashboard-app-card__title"><%= job.title %></h3>
+              <p class="dashboard-app-card__company"><%= job.company.name %></p>
             </div>
 
-            <div class="card-details">
-              <p><strong>Status:</strong> <%= application.status.titleize %></p>
-              <p><strong>Applied:</strong> <%= application.created_at.strftime("%B %d, %Y") %></p>
-              <p><strong>Location:</strong> <%= application.job_post.location %></p>
-              <p><strong>Remote:</strong> <%= application.job_post.remote ? "Yes" : "No" %></p>
+            <div class="dashboard-app-card__badges">
+              <span class="dashboard-app-card__badge dashboard-app-card__badge--<%= application.status %>">
+                <%= application.status.titleize %>
+              </span>
+              <% if job.remote %>
+                <span class="dashboard-app-card__badge dashboard-app-card__badge--remote">Remote</span>
+              <% end %>
+              <% if job.location.present? %>
+                <span class="dashboard-app-card__badge dashboard-app-card__badge--location"><%= job.location %></span>
+              <% end %>
             </div>
 
-            <div class="card-actions">
-              <%= link_to "View Details", job_application_path(application), class: "button-link" %>
-              <%= link_to "Update Status", edit_job_application_path(application), class: "button-secondary" %>
+            <dl class="dashboard-app-card__details">
+              <div>
+                <dt>Applied</dt>
+                <dd><%= application.applied_at.strftime("%B %d, %Y") %></dd>
+              </div>
+            </dl>
+
+            <div class="dashboard-app-card__actions">
+              <%= link_to "View details", job_application_path(application), class: "dashboard-app-card__link" %>
+              <%= link_to "Update status", edit_job_application_path(application), class: "dashboard-app-card__link dashboard-app-card__link--muted" %>
             </div>
-          </div>
+          </article>
         <% end %>
       </div>
     <% else %>
-      <p class="no-applications">You haven't applied to any jobs yet.</p>
+      <div class="dashboard-empty">
+        <p>You haven't applied to any jobs yet.</p>
+        <%= link_to "Browse job posts", job_posts_path, class: "dashboard-page__cta" %>
+      </div>
     <% end %>
-  </div>
-</div> 
+  </section>
+</div>
