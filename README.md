@@ -10,7 +10,7 @@ This document walks through how the major pieces fit together: models, concerns,
 
 - **Ruby on Rails 8** with **PostgreSQL**
 - **Authentication**: sesion-based login with `has_secure_password` (`bcrypt`)
-- **Background work**: **Sidekiq** in development (see `config/application.rb`). **Production** is configured to use **Solid Queue** (`config/environments/production.rb`); adjust if you standardize on one adapter everywhere.
+- **Background work**: **Solid Queue** in production (`config/environments/production.rb`). **Development** uses the in-process `:async` adapter (no Redis required). Optionally set `JOB_QUEUE_ADAPTER=sidekiq` and run Redis + Sidekiq if you prefer that locally.
 - **Pagination**: Kaminari (`JobPost` index)
 - **External API**: [SerpAPI](https://serpapi.com) Google Jobs (`google_search_results` gem, `ENV["SERPAPI_API_KEY"]`)
 - **Front end**: Hotwire (Turbo + Stimulus), importmap, Propshaft

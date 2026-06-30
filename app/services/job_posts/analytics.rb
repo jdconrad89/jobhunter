@@ -75,8 +75,44 @@ module JobPosts
       {
         labels: buckets.map { |bucket| bucket[:label] },
         counts: buckets.map { |bucket| counts[bucket[:label]] },
+        percentages: percentages_for(buckets.map { |bucket| counts[bucket[:label]] }, matching_posts),
         matching_posts: matching_posts
       }
+    end
+
+    def self.experience_distribution_for(points:, salary_min:, salary_max:)
+      pay_min = salary_min.to_i
+      pay_max = salary_max.to_i
+      pay_max = pay_min if pay_max < pay_min
+
+      counts = EXPERIENCE_BUCKETS.to_h { |bucket| [ bucket[:label], 0 ] }
+      matching_posts = 0
+
+      points.each do |point|
+        next unless ranges_overlap?(point[:pay_min], point[:pay_max], pay_min, pay_max)
+
+        matching_posts += 1
+
+        EXPERIENCE_BUCKETS.each do |bucket|
+          next unless ranges_overlap?(point[:exp_min], point[:exp_max], bucket[:min], bucket[:max])
+
+          counts[bucket[:label]] += 1
+        end
+      end
+
+      count_values = EXPERIENCE_BUCKETS.map { |bucket| counts[bucket[:label]] }
+      {
+        labels: EXPERIENCE_BUCKETS.map { |bucket| bucket[:label] },
+        counts: count_values,
+        percentages: percentages_for(count_values, matching_posts),
+        matching_posts: matching_posts
+      }
+    end
+
+    def self.percentages_for(counts, total)
+      return counts.map { 0.0 } if total.zero?
+
+      counts.map { |count| (count.to_f / total * 100).round(1) }
     end
 
     def self.ranges_overlap?(left_min, left_max, right_min, right_max)

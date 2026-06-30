@@ -3,5 +3,6 @@ class AnalyticsController < ApplicationController
 
   def index
     @analytics = JobPosts::Analytics.call(user: current_user)
+    @synopsis = JobPosts::AnalyticsSynopsis.call(@analytics)
   end
 end

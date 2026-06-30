@@ -71,7 +71,35 @@ RSpec.describe JobPosts::Analytics do
 
       expect(distribution[:matching_posts]).to eq(1)
       expect(distribution[:counts].compact.sum).to be >= 1
+      expect(distribution[:percentages].sum).to be > 0
       expect(distribution[:labels]).to include("$100k-124k")
+    end
+  end
+
+  describe ".experience_distribution_for" do
+    it "counts postings whose salary and experience ranges overlap the selection" do
+      points = [
+        { exp_min: 3, exp_max: 5, pay_min: 100_000, pay_max: 125_000 },
+        { exp_min: 8, exp_max: 10, pay_min: 180_000, pay_max: 220_000 }
+      ]
+
+      distribution = described_class.experience_distribution_for(
+        points: points,
+        salary_min: 100_000,
+        salary_max: 150_000
+      )
+
+      expect(distribution[:matching_posts]).to eq(1)
+      expect(distribution[:labels]).to include("4-6 yrs")
+      expect(distribution[:counts].sum).to be >= 1
+      bucket_index = distribution[:labels].index("4-6 yrs")
+      expect(distribution[:percentages][bucket_index]).to eq(100.0)
+    end
+  end
+
+  describe ".percentages_for" do
+    it "returns zeroes when there are no matching posts" do
+      expect(described_class.percentages_for([ 0, 0 ], 0)).to eq([ 0.0, 0.0 ])
     end
   end
 

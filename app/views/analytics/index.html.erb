@@ -66,15 +66,24 @@
 
     <section class="analytics-card analytics-card--wide">
       <header class="analytics-card__header">
-        <h2 class="analytics-card__title">Salary distribution by experience</h2>
+        <h2 class="analytics-card__title">Salary &amp; experience distribution</h2>
         <p class="analytics-card__description">
-          Select an experience range to see how salaries are distributed. Bars show posting counts per salary band;
-          the curve highlights the overall shape of the market for that experience level.
+          Explore how salary and experience requirements relate. Switch direction to filter by experience and see salaries,
+          or filter by salary and see experience levels. Hover a bar for posting counts and percentages.
         </p>
       </header>
 
       <% if @analytics.salary_points.any? %>
-        <div class="analytics-range-controls">
+        <div class="analytics-distribution-mode" role="tablist" aria-label="Distribution direction">
+          <button type="button" class="analytics-distribution-mode__btn analytics-distribution-mode__btn--active" data-distribution-mode="experience-to-salary" role="tab" aria-selected="true">
+            Experience → Salary
+          </button>
+          <button type="button" class="analytics-distribution-mode__btn" data-distribution-mode="salary-to-experience" role="tab" aria-selected="false">
+            Salary → Experience
+          </button>
+        </div>
+
+        <div class="analytics-range-controls" id="controls-experience-to-salary">
           <label>
             Minimum experience (years)
             <input type="range" id="experience-min" min="0" max="20" value="2" step="1" />
@@ -85,12 +94,29 @@
             <input type="range" id="experience-max" min="0" max="20" value="8" step="1" />
             <span id="experience-max-value">8</span> yrs
           </label>
-          <p class="analytics-range-summary" id="salary-range-summary">
+          <p class="analytics-range-summary" id="experience-to-salary-summary">
             Showing salary distribution for <strong>2–8 years</strong> of experience.
           </p>
         </div>
+
+        <div class="analytics-range-controls" id="controls-salary-to-experience" hidden>
+          <label>
+            Minimum salary
+            <input type="range" id="salary-min" min="50000" max="300000" value="100000" step="25000" />
+            <span id="salary-min-value">$100k</span>
+          </label>
+          <label>
+            Maximum salary
+            <input type="range" id="salary-max" min="50000" max="300000" value="175000" step="25000" />
+            <span id="salary-max-value">$175k</span>
+          </label>
+          <p class="analytics-range-summary" id="salary-to-experience-summary">
+            Showing experience distribution for <strong>$100k–$175k</strong> salaries.
+          </p>
+        </div>
+
         <div class="analytics-card__chart analytics-card__chart--salary">
-          <canvas id="salary-chart"></canvas>
+          <canvas id="distribution-chart"></canvas>
         </div>
       <% else %>
         <p class="analytics-empty">
@@ -99,13 +125,34 @@
       <% end %>
     </section>
   </div>
+
+  <section class="analytics-synopsis">
+    <header class="analytics-synopsis__header">
+      <h2 class="analytics-synopsis__title">Analysis synopsis</h2>
+      <p class="analytics-synopsis__description">
+        Auto-generated summary of your saved postings. Interactive charts above can be filtered further; this overview reflects your full dataset.
+      </p>
+    </header>
+
+    <div class="analytics-synopsis__body">
+      <% @synopsis.paragraphs.each do |paragraph| %>
+        <p class="analytics-synopsis__paragraph"><%= paragraph %></p>
+      <% end %>
+    </div>
+  </section>
 </div>
 
 <script id="analytics-data" type="application/json">
   <%= {
     experience: @analytics.experience_breakdown,
     skills: @analytics.top_skills,
-    salaryPoints: @analytics.salary_points
+    salaryPoints: @analytics.salary_points,
+    experienceBuckets: JobPosts::Analytics::EXPERIENCE_BUCKETS.map { |bucket| bucket.slice(:label, :min, :max) },
+    salaryConfig: {
+      bucketSize: JobPosts::Analytics::SALARY_BUCKET_SIZE,
+      rangeMin: JobPosts::Analytics::SALARY_RANGE_MIN,
+      rangeMax: JobPosts::Analytics::SALARY_RANGE_MAX
+    }
   }.to_json.html_safe %>
 </script>
 
@@ -180,9 +227,21 @@
 
     if (!data.salaryPoints?.length) return;
 
-    const SALARY_BUCKET_SIZE = 25000;
-    const SALARY_RANGE_MIN = 50000;
-    const SALARY_RANGE_MAX = 300000;
+    const SALARY_BUCKET_SIZE = data.salaryConfig.bucketSize;
+    const SALARY_RANGE_MIN = data.salaryConfig.rangeMin;
+    const SALARY_RANGE_MAX = data.salaryConfig.rangeMax;
+    const EXPERIENCE_BUCKETS = data.experienceBuckets;
+
+    const formatK = (amount) => (amount >= 1000 ? `${amount / 1000}k` : `${amount}`);
+    const formatSalaryLabel = (min, max) =>
+      max >= SALARY_RANGE_MAX ? `$${formatK(min)}+` : `$${formatK(min)}-${formatK(max)}`;
+    const formatSalaryAmount = (amount) => `$${formatK(amount)}`;
+
+    const rangesOverlap = (leftMin, leftMax, rightMin, rightMax) =>
+      leftMin <= rightMax && leftMax >= rightMin;
+
+    const percentagesFor = (counts, total) =>
+      total > 0 ? counts.map((count) => Math.round((count / total) * 1000) / 10) : counts.map(() => 0);
 
     const salaryBuckets = () => {
       const buckets = [];
@@ -190,11 +249,7 @@
 
       while (start < SALARY_RANGE_MAX) {
         const end = start + SALARY_BUCKET_SIZE - 1;
-        buckets.push({
-          min: start,
-          max: end,
-          label: formatSalaryLabel(start, end)
-        });
+        buckets.push({ min: start, max: end, label: formatSalaryLabel(start, end) });
         start += SALARY_BUCKET_SIZE;
       }
 
@@ -207,15 +262,7 @@
       return buckets;
     };
 
-    const formatSalaryLabel = (min, max) => {
-      const formatK = (amount) => (amount >= 1000 ? `${amount / 1000}k` : `${amount}`);
-      return max >= SALARY_RANGE_MAX ? `$${formatK(min)}+` : `$${formatK(min)}-${formatK(max)}`;
-    };
-
-    const rangesOverlap = (leftMin, leftMax, rightMin, rightMax) =>
-      leftMin <= rightMax && leftMax >= rightMin;
-
-    const distributeRangeAcrossBuckets = (rangeMin, rangeMax, onBucket) => {
+    const distributeRangeAcrossBuckets = (rangeMin, rangeMax, buckets, onBucket) => {
       const clippedMin = Math.max(rangeMin, SALARY_RANGE_MIN);
       const clippedMax = Math.min(rangeMax, SALARY_RANGE_MAX);
       if (clippedMin > clippedMax) return;
@@ -243,43 +290,119 @@
         if (!rangesOverlap(point.exp_min, point.exp_max, expMin, expMax)) return;
 
         matchingPosts += 1;
-        distributeRangeAcrossBuckets(point.pay_min, point.pay_max, (label) => {
+        distributeRangeAcrossBuckets(point.pay_min, point.pay_max, buckets, (label) => {
           if (counts[label] !== undefined) counts[label] += 1;
         });
       });
 
+      const countValues = buckets.map((bucket) => counts[bucket.label]);
+      const percentages = percentagesFor(countValues, matchingPosts);
+
       return {
         labels: buckets.map((bucket) => bucket.label),
-        counts: buckets.map((bucket) => counts[bucket.label]),
-        matchingPosts
+        counts: countValues,
+        percentages,
+        matchingPosts,
+        xTitle: "Annual salary (USD)",
+        yTitle: "Job postings in salary band",
+        skipTicks: true
       };
     };
 
-    const minInput = document.getElementById("experience-min");
-    const maxInput = document.getElementById("experience-max");
-    const minValue = document.getElementById("experience-min-value");
-    const maxValue = document.getElementById("experience-max-value");
-    const summary = document.getElementById("salary-range-summary");
-    const salaryCanvas = document.getElementById("salary-chart");
+    const computeExperienceDistribution = (points, salaryMin, salaryMax) => {
+      const payMin = Math.min(salaryMin, salaryMax);
+      const payMax = Math.max(salaryMin, salaryMax);
+      const counts = Object.fromEntries(EXPERIENCE_BUCKETS.map((bucket) => [bucket.label, 0]));
+      let matchingPosts = 0;
 
-    let salaryChart;
+      points.forEach((point) => {
+        if (!rangesOverlap(point.pay_min, point.pay_max, payMin, payMax)) return;
 
-    const renderSalaryChart = () => {
-      let expMin = parseInt(minInput.value, 10);
-      let expMax = parseInt(maxInput.value, 10);
+        matchingPosts += 1;
+        EXPERIENCE_BUCKETS.forEach((bucket) => {
+          if (rangesOverlap(point.exp_min, point.exp_max, bucket.min, bucket.max)) {
+            counts[bucket.label] += 1;
+          }
+        });
+      });
 
-      if (expMin > expMax) {
-        [expMin, expMax] = [expMax, expMin];
-        minInput.value = expMin;
-        maxInput.value = expMax;
+      const labels = EXPERIENCE_BUCKETS.map((bucket) => bucket.label);
+      const countValues = labels.map((label) => counts[label]);
+      const percentages = percentagesFor(countValues, matchingPosts);
+
+      return {
+        labels,
+        counts: countValues,
+        percentages,
+        matchingPosts,
+        xTitle: "Years of experience",
+        yTitle: "Job postings in experience band",
+        skipTicks: false
+      };
+    };
+
+    const modeButtons = document.querySelectorAll("[data-distribution-mode]");
+    const controlsExperienceToSalary = document.getElementById("controls-experience-to-salary");
+    const controlsSalaryToExperience = document.getElementById("controls-salary-to-experience");
+    const experienceMinInput = document.getElementById("experience-min");
+    const experienceMaxInput = document.getElementById("experience-max");
+    const experienceMinValue = document.getElementById("experience-min-value");
+    const experienceMaxValue = document.getElementById("experience-max-value");
+    const experienceToSalarySummary = document.getElementById("experience-to-salary-summary");
+    const salaryMinInput = document.getElementById("salary-min");
+    const salaryMaxInput = document.getElementById("salary-max");
+    const salaryMinValue = document.getElementById("salary-min-value");
+    const salaryMaxValue = document.getElementById("salary-max-value");
+    const salaryToExperienceSummary = document.getElementById("salary-to-experience-summary");
+    const distributionCanvas = document.getElementById("distribution-chart");
+
+    let distributionMode = "experience-to-salary";
+    let distributionChart;
+
+    const tooltipLabel = (context, distribution) => {
+      const count = context.parsed.y ?? 0;
+      const pct = distribution.percentages[context.dataIndex] ?? 0;
+      return `${context.dataset.label}: ${count} posting${count === 1 ? "" : "s"} (${pct}%)`;
+    };
+
+    const renderDistributionChart = () => {
+      let distribution;
+
+      if (distributionMode === "experience-to-salary") {
+        let expMin = parseInt(experienceMinInput.value, 10);
+        let expMax = parseInt(experienceMaxInput.value, 10);
+
+        if (expMin > expMax) {
+          [expMin, expMax] = [expMax, expMin];
+          experienceMinInput.value = expMin;
+          experienceMaxInput.value = expMax;
+        }
+
+        experienceMinValue.textContent = expMin;
+        experienceMaxValue.textContent = expMax;
+
+        distribution = computeSalaryDistribution(data.salaryPoints, expMin, expMax);
+        experienceToSalarySummary.innerHTML =
+          `Showing salary distribution for <strong>${expMin}–${expMax} years</strong> of experience ` +
+          `(<strong>${distribution.matchingPosts}</strong> matching postings).`;
+      } else {
+        let payMin = parseInt(salaryMinInput.value, 10);
+        let payMax = parseInt(salaryMaxInput.value, 10);
+
+        if (payMin > payMax) {
+          [payMin, payMax] = [payMax, payMin];
+          salaryMinInput.value = payMin;
+          salaryMaxInput.value = payMax;
+        }
+
+        salaryMinValue.textContent = formatSalaryAmount(payMin);
+        salaryMaxValue.textContent = formatSalaryAmount(payMax);
+
+        distribution = computeExperienceDistribution(data.salaryPoints, payMin, payMax);
+        salaryToExperienceSummary.innerHTML =
+          `Showing experience distribution for <strong>${formatSalaryAmount(payMin)}–${formatSalaryAmount(payMax)}</strong> salaries ` +
+          `(<strong>${distribution.matchingPosts}</strong> matching postings).`;
       }
-
-      minValue.textContent = expMin;
-      maxValue.textContent = expMax;
-      summary.innerHTML = `Showing salary distribution for <strong>${expMin}–${expMax} years</strong> of experience (<span id="matching-post-count"></span> postings).`;
-
-      const distribution = computeSalaryDistribution(data.salaryPoints, expMin, expMax);
-      document.getElementById("matching-post-count").textContent = distribution.matchingPosts;
 
       const chartData = {
         labels: distribution.labels,
@@ -307,47 +430,78 @@
         ]
       };
 
-      if (salaryChart) {
-        salaryChart.data = chartData;
-        salaryChart.update();
-        return;
-      }
-
-      salaryChart = new Chart(salaryCanvas, {
-        type: "bar",
-        data: chartData,
-        options: {
-          ...chartDefaults,
-          plugins: {
-            legend: {
-              display: true,
-              position: "top"
-            },
-            tooltip: {
-              callbacks: {
-                label: (context) => {
-                  const count = context.parsed.y ?? context.parsed;
-                  return `${context.dataset.label}: ${count} posting${count === 1 ? "" : "s"}`;
-                }
-              }
+      const chartOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: true, position: "top" },
+          tooltip: {
+            callbacks: {
+              title: (items) => distribution.labels[items[0]?.dataIndex] ?? "",
+              label: (context) => tooltipLabel(context, distribution)
             }
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: { precision: 0 },
+            title: { display: true, text: distribution.yTitle }
           },
-          scales: {
-            y: {
-              beginAtZero: true,
-              ticks: { precision: 0 },
-              title: { display: true, text: "Job postings in salary band" }
-            },
-            x: {
-              title: { display: true, text: "Annual salary (USD)" }
+          x: {
+            title: { display: true, text: distribution.xTitle },
+            ticks: {
+              maxRotation: distribution.skipTicks ? 45 : 0,
+              minRotation: distribution.skipTicks ? 45 : 0,
+              autoSkip: distribution.skipTicks,
+              font: { size: 11 }
             }
           }
         }
+      };
+
+      if (distributionChart) {
+        distributionChart.data = chartData;
+        distributionChart.options = chartOptions;
+        distributionChart.update();
+        return;
+      }
+
+      distributionChart = new Chart(distributionCanvas, {
+        type: "bar",
+        data: chartData,
+        options: chartOptions
       });
     };
 
-    minInput.addEventListener("input", renderSalaryChart);
-    maxInput.addEventListener("input", renderSalaryChart);
-    renderSalaryChart();
+    const setDistributionMode = (mode) => {
+      distributionMode = mode;
+      modeButtons.forEach((button) => {
+        const active = button.dataset.distributionMode === mode;
+        button.classList.toggle("analytics-distribution-mode__btn--active", active);
+        button.setAttribute("aria-selected", active ? "true" : "false");
+      });
+      controlsExperienceToSalary.hidden = mode !== "experience-to-salary";
+      controlsSalaryToExperience.hidden = mode !== "salary-to-experience";
+      renderDistributionChart();
+    };
+
+    modeButtons.forEach((button) => {
+      button.addEventListener("click", () => setDistributionMode(button.dataset.distributionMode));
+    });
+
+    experienceMinInput.addEventListener("input", () => {
+      if (distributionMode === "experience-to-salary") renderDistributionChart();
+    });
+    experienceMaxInput.addEventListener("input", () => {
+      if (distributionMode === "experience-to-salary") renderDistributionChart();
+    });
+    salaryMinInput.addEventListener("input", () => {
+      if (distributionMode === "salary-to-experience") renderDistributionChart();
+    });
+    salaryMaxInput.addEventListener("input", () => {
+      if (distributionMode === "salary-to-experience") renderDistributionChart();
+    });
+    setDistributionMode("experience-to-salary");
   });
 </script>

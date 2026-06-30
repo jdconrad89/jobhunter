@@ -24,6 +24,9 @@ RSpec.describe "Analytics", type: :request do
     expect(response.body).to include("Job Post Analytics")
     expect(response.body).to include("Experience requirements")
     expect(response.body).to include("Most requested skills")
-    expect(response.body).to include("Salary distribution by experience")
+    expect(response.body).to include("Salary &amp; experience distribution")
+    expect(response.body).to include("Experience → Salary")
+    expect(response.body).to include("Salary → Experience")
+    expect(response.body).to include("Analysis synopsis")
   end
 end
