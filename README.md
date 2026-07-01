@@ -40,6 +40,12 @@ Track applications across pipeline stages with drag-and-drop status updates.
 
 ![Application Board — kanban tracker](docs/screenshots/application-board.png)
 
+### Chrome Extension
+
+Import job postings from any page via the side panel — auto-saved drafts, site-specific extractors, and one-click save to the API.
+
+![Chrome Extension — import side panel](docs/screenshots/chrome-extension.png)
+
 ---
 
 ## Features
