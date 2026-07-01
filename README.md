@@ -1,19 +1,118 @@
-# Jobhunter
+# JobHunter
 
-A Rails application for **discovering job listings** (via automated searches tied to SerpAPI’s Google Jobs engine), **browsing and filtering** those listings, and **tracking your applications** on a simple kanban-style board.
+A Rails application for **discovering job listings**, **browsing and filtering** them, **analyzing market trends** in your saved posts, and **tracking applications** on a kanban-style board.
 
-This document walks through how the major pieces fit together: models, concerns, services, jobs, controllers, and supporting code.
+Listings come from three paths:
+
+1. **Automated searches** — SerpAPI’s Google Jobs engine, triggered manually from the dashboard (scheduled runs are not implemented yet).
+2. **Manual web entry** — add a job from the Job Posts UI.
+3. **Chrome extension** — scrape a job page in the browser and `POST` it to the API.
+
+This document describes the current setup: models, services, jobs, controllers, security, and how the pieces fit together.
+
+---
+
+## Screenshots
+
+### Dashboard
+
+Manage automated job searches, trigger scrapes, and preview recent applications (with a configurable limit).
+
+![Dashboard — job searches and recent applications](docs/screenshots/dashboard.png)
+
+### Job Posts
+
+Browse saved listings in a card grid with filters for company, remote, pay range, position type, and experience.
+
+![Job Posts — filtered card index](docs/screenshots/job-posts.png)
+
+### Analytics
+
+Explore experience demand, top skills, and salary distributions with interactive charts and an auto-generated synopsis.
+
+![Analytics — experience and skills charts](docs/screenshots/analytics-overview.png)
+
+![Analytics — salary and experience distribution](docs/screenshots/analytics-salary.png)
+
+### Application Board
+
+Track applications across pipeline stages with drag-and-drop status updates.
+
+![Application Board — kanban tracker](docs/screenshots/application-board.png)
+
+---
+
+## Features
+
+| Area | What you can do |
+|------|-----------------|
+| **Dashboard** | Manage job searches (create, edit, delete, trigger scrape). Preview recent applications (default 10; choose 5/10/20/50 via `?applications_limit=`). |
+| **Job posts** | Card index with filters (company, remote, pay range, position type, experience). Detail view with pay highlighting, suggested similar posts, and “I applied” action. |
+| **Analytics** | Charts for experience breakdown, top skills, and salary↔experience distribution; auto-generated synopsis. Scoped to the current user’s posts. |
+| **Application board** | Kanban columns (`applied`, `interviewing`, `rejected`, `ghosted`); drag-and-drop status updates; inline “followed up” checkbox. |
+| **API + extension** | Bearer-token auth; `GET`/`POST /api/job_posts` for the Chrome side panel. Tokens are SHA-256 digests — plaintext shown once after generate/regenerate. |
 
 ---
 
 ## Tech stack
 
-- **Ruby on Rails 8** with **PostgreSQL**
-- **Authentication**: sesion-based login with `has_secure_password` (`bcrypt`)
-- **Background work**: **Solid Queue** in production (`config/environments/production.rb`). **Development** uses the in-process `:async` adapter (no Redis required). Optionally set `JOB_QUEUE_ADAPTER=sidekiq` and run Redis + Sidekiq if you prefer that locally.
-- **Pagination**: Kaminari (`JobPost` index)
-- **External API**: [SerpAPI](https://serpapi.com) Google Jobs (`google_search_results` gem, `ENV["SERPAPI_API_KEY"]`)
-- **Front end**: Hotwire (Turbo + Stimulus), importmap, Propshaft
+| Layer | Choice |
+|-------|--------|
+| Framework | **Ruby on Rails 8** |
+| Database | **PostgreSQL** |
+| Auth | Session-based login (`has_secure_password` / bcrypt); `reset_session` on login, signup, and logout |
+| Background jobs | **Solid Queue** in production. **Development** uses the in-process `:async` adapter (no Redis). Optionally `JOB_QUEUE_ADAPTER=sidekiq` with Redis + Sidekiq. |
+| Pagination | Kaminari (`JobPost` index) |
+| Job discovery | [SerpAPI](https://serpapi.com) Google Jobs (`google_search_results` gem, `ENV["SERPAPI_API_KEY"]`) |
+| Front end | Hotwire (Turbo + Stimulus), importmap, Propshaft, Tailwind CSS (via `bin/dev`) |
+| Charts | Chart.js (loaded on analytics page from jsDelivr CDN) |
+| Security | **rack-attack** throttles (login, signup, API); CSP in **report-only** mode; **rack-cors** for Chrome extension → `/api/*` |
+| Tests / CI | RSpec, SimpleCov, Brakeman, RuboCop, importmap audit — see `.github/workflows/ci.yml` |
+
+---
+
+## Getting started
+
+### Prerequisites
+
+- Ruby (see `.ruby-version`)
+- PostgreSQL
+- `SERPAPI_API_KEY` — required for live automated scraping (not needed for manual entry or the Chrome extension)
+
+### Setup
+
+```bash
+bundle install
+yarn install          # Tailwind / PostCSS
+bin/rails db:prepare
+```
+
+### Run locally
+
+```bash
+bin/dev               # Rails server + Tailwind watcher (recommended)
+# or: bin/rails server
+```
+
+Open `http://localhost:3000`, sign up, and use the nav: Dashboard, Job Posts, Analytics, Applications, API Token.
+
+### Chrome extension
+
+See [`chrome-extension/README.md`](chrome-extension/README.md). Summary:
+
+1. Generate an API token under **API Token** in the nav.
+2. Load `chrome-extension/` as an unpacked extension in Chrome.
+3. Set server URL and token in extension options.
+4. Open a job page → extension side panel → **Save to JobHunter**.
+
+### Environment variables
+
+| Variable | Purpose |
+|----------|---------|
+| `SERPAPI_API_KEY` | SerpAPI Google Jobs searches |
+| `JOB_QUEUE_ADAPTER` | Optional: `sidekiq` in development (default is `async`) |
+| `REDIS_URL` | Redis URL when using Sidekiq (default `redis://localhost:6379/0`) |
+| `PGHOST`, `PGUSER`, `PGPASSWORD` | PostgreSQL connection (CI and non-default local setups) |
 
 ---
 
@@ -28,80 +127,62 @@ flowchart LR
   JobPost --> JobApplication
 ```
 
-
-
-- A **User** owns **JobSearches** (saved search configurations) and **JobApplications** (their pipeline for specific **JobPosts**).
-- Each **JobPost** belongs to a **Company** and to the **JobSearch** that produced or grouped it (including a synthetic “manual entry” search for user-added posts).
-- Scraping runs in the background and creates **Companies** and **JobPosts**; it does not create applications for you.
+- A **User** owns **JobSearches** and **JobApplications**.
+- Each **JobPost** belongs to a **Company** and a **JobSearch** (including a per-user synthetic **“Manual Job Entries”** search).
+- Scraping creates **Companies** and **JobPosts** only — not applications.
 
 ---
 
-## Data model (Active Record)
+## Data model
 
 ### `User` (`app/models/user.rb`)
 
-- Credentials: `email` (unique), `password` / `password_digest`, `name`.
-- Associations: `has_many :job_searches`, `has_many :job_applications`.
-- Used everywhere the app scopes data to `current_user` after login.
+- `name`, `email` (unique), `password_digest`.
+- `api_token_digest` — SHA-256 hash of the Chrome/API bearer token (plaintext never stored).
+- `has_many :job_searches`, `has_many :job_applications`.
+- `regenerate_api_token!` / `authenticate_api_token` for API auth.
 
 ### `JobSearch` (`app/models/job_search.rb`)
 
-Represents **one configured scrape**: title query, optional location, remote flag, language, timezone, optional daily `**runtime`** (time of day stored on the record), and `**board_relevance`**.
+One configured scrape (or the synthetic manual bucket):
 
-- `**board_relevance**`: an ordered list of **job board names** as they appear on Google Jobs “apply” options (e.g. `LinkedIn`, `Indeed`). The scraper uses this to prefer certain apply links when multiple exist—not URLs.
-- Validations enforce language code shape, timezone name, and sensible `board_relevance` entries (non-blank strings, max length).
-- `**number_of_jobs`**: cached count of related `job_posts`; updated when posts are created/destroyed (via `JobPost` callbacks calling `job_search.update_number_of_jobs!`).
+- `job_title`, optional `location`, `remote`, `language_code`, `timezone`.
+- `runtime` — time-of-day stored on the record (scheduling not wired up yet).
+- `board_relevance` — ordered job board names from Google Jobs apply options (e.g. `LinkedIn`, `Indeed`); used to pick preferred apply URLs.
+- `number_of_jobs` — cached count; updated via `JobPost` callbacks.
+- `manual?` — true for the **“Manual Job Entries”** search; cannot be edited, deleted, or triggered.
 
 ### `Company` (`app/models/company.rb`)
 
-- `name` (required), optional `description` (often filled when first seen from scrape data).
-- `has_many :job_posts`. Companies are shared across searches when the name matches.
+- `name` (required), optional `description`.
+- Shared across searches when names match.
 
 ### `JobPost` (`app/models/job_post.rb`)
 
-Core listing record: title, website (apply URL), description, location, remote, `posted_at`, denormalized **pay** and **experience** numeric columns for filtering.
-
-- **Filtering the index** is delegated to `**JobPosts::Filter`** (`app/models/job_posts/filter.rb`): company name (ILIKE), remote, contract vs full-time heuristics, pay range, experience range. `**JobPostsController`** permits only filter keys, then `**JobPost.filtered(...)**` applies them.
-- **Description-derived behavior** lives in concerns (see below): pay/experience parsing, skills, contract detection, `**suggested_jobs`**.
-- **Callbacks**: default `posted_at` on create; before save, populate `pay_range_*` and `experience_years_*` from description text; after save/destroy, refresh parent search’s `number_of_jobs`.
+- `title`, `website` (apply URL, validated as safe http/https), `description`, `location`, `remote`, `posted_at`.
+- Denormalized `pay_range_min` / `pay_range_max`, `experience_years_min` / `experience_years_max` for filtering.
+- Index filtering via `JobPosts::Filter` (company ILIKE, remote, contract vs full-time, pay range, experience range).
+- Concerns: `JobPost::DescriptionEnrichment` (pay, experience, skills, contract detection), `JobPost::SimilarListings` (`suggested_jobs` on show).
 
 ### `JobApplication` (`app/models/job_application.rb`)
 
-- One row per user per job post (`uniqueness` on `job_post_id` scoped to `user_id`).
-- `**JobApplication::STATUSES`**: `applied`, `interviewing`, `rejected`, `ghosted`—single source of truth for validation and UI.
-- `**applied_at`** required; defaults set on create.
-- **Manual “ghosted”**: the HTML form sends `**mark_as_ghosted`**; the controller merges that with nested `job_application` params so ghosting is explicit, not time-based.
-
----
-
-## Concerns and supporting model objects
-
-### `JobPost::DescriptionEnrichment` (`app/models/concerns/job_post/description_enrichment.rb`)
-
-Included by `JobPost`. Holds regex dictionaries and logic to:
-
-- Extract and parse **salary ranges** from description text into `pay_range_min` / `pay_range_max`.
-- Extract **years of experience** (numeric and word-based phrases) into `experience_years_min` / `experience_years_max`.
-- `**contract?`**: heuristic on title + description.
-- `**extracted_skills`**: keyword/regex map (Ruby, Rails, React, AWS, etc.) for light skill tagging.
-
-### `JobPost::SimilarListings` (`app/models/concerns/job_post/similar_listings.rb`)
-
-- `**suggested_jobs**`: ranks other posts by overlap of `extracted_skills` (used on job post **show**).
-
-### `JobPosts::Filter` (`app/models/job_posts/filter.rb`)
-
-- PORO invoked as `**JobPosts::Filter.call(filter_params)`** with a **Hash** (or permitted params converted via `**to_h`**) already allowlisted in `**JobPostsController#job_post_filter_params`**. Builds an `ActiveRecord::Relation` with joins/scopes; does not call `**permit**` itself.
+- One per user per job post.
+- `STATUSES`: `applied`, `interviewing`, `rejected`, `ghosted`.
+- `applied_at` (required), `contact_info`, `followed_up`.
+- HTML form uses `mark_as_ghosted` checkbox; controller merges into status.
 
 ---
 
 ## Services
 
-### `JobScraper` (`app/services/job_scraper.rb`)
-
-- Initialized with `**job_search:**` (reads title, location, remote, language, board list, target count).
-- `**#scrape**`: pages SerpAPI Google Jobs (`GoogleSearch` / `google_search_results`), deduplicates by title + company, normalizes apply URLs (e.g. strips `utm_*` query params), sorts apply options using `**board_relevance**`, parses relative posted-at strings.
-- **No database writes**—returns an array of hashes for the job to persist.
+| Service | Role |
+|---------|------|
+| `JobScraper` | SerpAPI Google Jobs: paginate, dedupe, normalize apply URLs (strip `utm_*`), respect `board_relevance`, parse relative posted dates. Returns hashes — no DB writes. Uses `URI.decode_www_form` (Ruby 3.4–compatible). |
+| `JobPosts::CreateManual` | Shared by web `JobPostsController#create` and `Api::JobPostsController#create`. Finds/creates company + manual `JobSearch`. |
+| `JobPosts::Filter` | Query object for job post index filters. |
+| `JobPosts::Analytics` | Aggregates experience, skills, and salary data for the current user’s posts. |
+| `JobPosts::AnalyticsSynopsis` | Plain-language summary from analytics result. |
+| `JobPosts::SafeUrl` | Validates http/https URLs for links and `JobPost#website`. |
 
 ---
 
@@ -109,151 +190,118 @@ Included by `JobPost`. Holds regex dictionaries and logic to:
 
 ### `JobScraperJob` (`app/jobs/job_scraper_job.rb`)
 
-- `**perform(job_search_id)`** enqueues only an ID (not the full `JobSearch` record).
-- Loads the search; sets `Time.zone` from the search’s timezone; runs `**JobScraper`**, then `**import_scrape_results!**`.
-- `**import_scrape_results!**` wraps all `**Company**` / `**JobPost**` creates in a **single transaction** so a failure mid-import does not leave a partial batch.
-- `**find_or_create_by!`** on posts keys on `job_search`, `title`, `company`, `website`; the block sets description, location, remote, `posted_at` only when **creating** a new row.
-- Errors are logged and **re-raised** so the queue can retry (per your Sidekiq / Solid Queue policy).
-
-### `ApplicationJob` (`app/jobs/application_job.rb`)
-
-Standard Rails base class for shared job configuration (retries, etc., if you add them later).
+- `perform(job_search_id)` — ID only in the queue payload.
+- Skips missing or manual searches.
+- Runs `JobScraper`, then `import_scrape_results!` in a **single transaction** (`find_or_create_by!` on company + post).
+- Errors logged and re-raised for queue retry.
 
 ---
 
-## Controllers
+## HTTP layer
 
-### `ApplicationController`
+### Routes
 
-- `**current_user`** from `session[:user_id]`; `**require_login`** redirects to login.
-- `**allow_browser versions: :modern**` (Rails default for modern-only features).
+| Path | Controller | Notes |
+|------|------------|-------|
+| `/`, `/dashboard` | `DashboardController#index` | Login required |
+| `/job_searches` | `JobSearchesController` | CRUD + `POST …/trigger` |
+| `/job_posts` | `JobPostsController` | index, show, new, create |
+| `/job_posts/:id/job_applications` | `JobApplicationsController#create` | “I applied” |
+| `/job_applications` | `JobApplicationsController` | Board + show/edit/update |
+| `/analytics` | `AnalyticsController#index` | Login required |
+| `/api_token` | `ApiTokensController` | show, create (regenerate) |
+| `/api/job_posts` | `Api::JobPostsController` | JSON index + create; **Bearer token required** |
+| `/login`, `/logout`, `/signup` | Sessions / Users | |
+| `/up` | Health check | |
 
-### `SessionsController` / `UsersController`
+### Controllers (highlights)
 
-Sign in, sign out, registration (`signup`).
+- **`ApplicationController`** — `current_user` from `session[:user_id]`; `require_login`.
+- **`DashboardController`** — job searches + paginated recent applications (`APPLICATION_LIMIT_OPTIONS`: 5, 10, 20, 50; default 10).
+- **`JobSearchesController`** — blocks edit/update/delete/trigger on manual search.
+- **`JobApplicationsController`** — JSON `PATCH` for drag-and-drop and follow-up checkbox; HTML form for full edit.
+- **`Api::BaseController`** — `Authorization: Bearer <token>`; scopes all API data to `current_user`.
 
-### `DashboardController`
+### Helpers
 
-- `**index**`: logged-in home—lists the user’s **job searches** and **job applications** (for the dashboard view).
-
-### `JobSearchesController`
-
-- Full CRUD for **JobSearch** (nested under the current user).
-- `**trigger`** (`POST …/job_searches/:id/trigger`): enqueues `**JobScraperJob.perform_later(job_search.id)`**.
-
-### `JobPostsController`
-
-- `**index**`: `**JobPost.filtered(job_post_filter_params)**` + pagination; loads which of the visible posts the user has already applied to.
-- `**show**`: suggested jobs + optional `JobApplication` for current user.
-- `**new` / `create**`: manual job entry; finds or creates `**Company**`, attaches post to a per-user synthetic `**JobSearch**` titled **“Manual Job Entries”** so every post stays tied to a search.
-
-### `JobApplicationsController`
-
-- `**create`**: nested under `**job_posts`**—“I applied to this post.”
-- `**index**`: board grouped by `**JobApplication::STATUSES**`.
-- `**show` / `edit**`: same form template; updates status, contact info, followed-up flag.
-- `**update**`: accepts top-level JSON params (`status`, `followed_up`) for drag-and-drop / checkboxes, or nested `job_application` for the form; validates status against `**JobApplication::STATUSES**`; merges `**mark_as_ghosted**` for HTML ghosting.
-
-### `Api::JobPostsController`
-
-- `**index**`: JSON list of posts with company—useful for integrations; **no auth** in the current code—treat as public only if that is intentional.
+- **`JobPostsHelper`** — safe external links (`JobPosts::SafeUrl`), sanitized description with pay highlight.
 
 ---
 
-## Helpers
+## Front end
 
-### `JobPostsHelper`
-
-- `**job_post_description_with_highlighted_pay(job_post)`**: formats description with `simple_format` and wraps the extracted pay snippet in a highlight span (keeps presentation out of the model).
-
-### `JobSearchesHelper`
-
-Present for search-related views (extend as needed).
+- **Stimulus** — `job_search_controller.js` for dynamic board-relevance rows on the job search form.
+- **Application board** — inline JavaScript for drag-and-drop and follow-up `PATCH` (see `job_applications/index.html.erb`).
+- **Analytics** — Chart.js with range sliders and distribution mode toggle.
+- **Styles** — page-scoped CSS (`job_posts.css`, `analytics.css`, `dashboard.css`, `job_applications.css`) plus shared tokens in `application.css`.
+- **Navigation** — Dashboard, Job Posts, Analytics, Applications, API Token.
 
 ---
 
-## Front-end notes (views + JS)
+## Security
 
-- **Job search form** (`job_searches/new.html.erb`): Stimulus controller `**job_search_controller.js`** for dynamic “preferred job boards” rows and client-side checks.
-- **Application tracker** (`job_applications/index.html.erb`): drag-and-drop between columns issues **PATCH** with JSON `status`; inline “followed up” checkbox PATCHes `job_application: { followed_up }`.
-
----
-
-## Routes (summary)
-
-
-| Area                              | Notes                              |
-| --------------------------------- | ---------------------------------- |
-| `/`                               | `dashboard#index` (requires login) |
-| `/dashboard`                      | Same dashboard                     |
-| `/job_searches`                   | CRUD + `POST …/trigger`            |
-| `/job_posts`                      | index, show, new, create           |
-| `/job_posts/:id/job_applications` | POST create                        |
-| `/job_applications`               | index, show, edit, update          |
-| `/login`, `/logout`, `/signup`    | Sessions + users                   |
-| `/api/job_posts`                  | JSON index                         |
-
+| Measure | Implementation |
+|---------|----------------|
+| API tokens | Stored as SHA-256 digest; shown once in session after generate |
+| Sessions | `reset_session` on login, signup, logout |
+| Rate limiting | rack-attack on `/login`, `/signup`, `/api/*` (disabled in test) |
+| CORS | `chrome-extension://` and `http://localhost:3000` → `/api/*` |
+| CSP | Report-only (`config/initializers/content_security_policy.rb`) |
+| XSS | Sanitized job descriptions; `JobPosts::SafeUrl` for outbound links |
+| Strong params | Controllers permit explicit param lists |
 
 ---
 
-## Configuration and operations
-
-### Environment
-
-- `**SERPAPI_API_KEY`**: required for live scraping.
-
-### Background processing
-
-- **Development**: `config.active_job.queue_adapter = :sidekiq` — run Redis, Sidekiq, and the Rails server.
-- **Production**: configured for **Solid Queue** and an optional SQLite queue DB in `database.yml`; align adapters with how you deploy.
-
-### Tests
-
-- RSpec (`spec/`), with request, model, and job specs covering scraper, filters, applications, etc.
-
-### Typical setup
+## Tests and CI
 
 ```bash
-bundle install
-bin/rails db:prepare
-bin/dev   # or rails s + separate JS watcher, plus Sidekiq as needed
+bundle exec rspec
 ```
 
----
+GitHub Actions (`.github/workflows/ci.yml`):
 
-## File map (quick reference)
+- Brakeman (Ruby security scan)
+- importmap audit (JS dependencies)
+- RuboCop
+- RSpec with PostgreSQL 16 service
 
-
-| Path                             | Role                                                        |
-| -------------------------------- | ----------------------------------------------------------- |
-| `app/models/`                    | `User`, `JobSearch`, `Company`, `JobPost`, `JobApplication` |
-| `app/models/concerns/job_post/`  | Description parsing + similar listings                      |
-| `app/models/job_posts/filter.rb` | Index filtering query object                                |
-| `app/services/job_scraper.rb`    | SerpAPI scrape orchestration                                |
-| `app/jobs/job_scraper_job.rb`    | Async import + transaction                                  |
-| `app/controllers/`               | HTTP layer; `api/` for JSON                                 |
-| `app/helpers/`                   | View helpers (e.g. pay highlighting)                        |
-| `app/javascript/controllers/`    | Stimulus (e.g. job search form)                             |
-| `config/routes.rb`               | URL map                                                     |
-| `db/schema.rb`                   | Canonical schema                                            |
-
+SimpleCov enforces ~90% line coverage when the full suite runs locally.
 
 ---
 
-## Design choices (for maintainers)
+## File map
 
-1. **Job posts always belong to a** `JobSearch`, including manual entries, via a dedicated search per user, so counts and foreign keys stay consistent.
-2. **Scrape jobs take an ID only**, avoids serializing full AR objects in the queue.
-3. **Import is transactional**, all-or-nothing per scrape batch for DB consistency. (We shouldn't really care if one errors and just skip to the next one)
-4. **Statuses are centralized on** `JobApplication`, controllers and views reference `JobApplication::STATUSES`.
-5. **Heavy** `JobPost` **behavior is split**, concerns + `JobPosts::Filter` + helper keep the AR class focused on persistence and associations.
-
-If you extend the app, prefer new **service objects** for integrations, **query objects** under `app/models/.../filter.rb` (or `app/queries`) for complex reads, and **jobs** only for async orchestration and retries.
+| Path | Role |
+|------|------|
+| `app/models/` | `User`, `JobSearch`, `Company`, `JobPost`, `JobApplication` |
+| `app/models/concerns/job_post/` | Description enrichment, similar listings |
+| `app/models/job_posts/filter.rb` | Index filtering |
+| `app/services/job_scraper.rb` | SerpAPI orchestration |
+| `app/services/job_posts/` | Manual create, analytics, safe URL |
+| `app/jobs/job_scraper_job.rb` | Async scrape + import |
+| `app/controllers/api/` | Token-authenticated JSON API |
+| `app/views/analytics/` | Analytics dashboard |
+| `app/javascript/controllers/` | Stimulus |
+| `chrome-extension/` | Browser extension (side panel + extractors) |
+| `config/routes.rb` | URL map |
+| `db/schema.rb` | Canonical schema |
 
 ---
 
-## TODO List
+## Design choices
 
-1. Update logic in `JobScraperJob` specifically `import_scrape_results!` to not be in a transaction, we can always safe the failures and try again or just report them back
-2. Add cron logic to run a job every hour that will query to find any and all `JobSearch`'s that are scheduled to run at that time and queue up the `JobScraperJob` for each one
+1. **Every job post belongs to a `JobSearch`** — including manual entries via a dedicated search per user.
+2. **Scrape jobs enqueue an ID only** — avoids serializing Active Record objects in the queue.
+3. **Import is transactional** — all-or-nothing per scrape batch (see maintainer TODOs below).
+4. **Statuses live on `JobApplication::STATUSES`** — single source for validation, board, and forms.
+5. **Heavy `JobPost` logic is split** — concerns, filter query object, and services keep the model focused.
+6. **Manual entry is unified** — web form and Chrome extension both use `JobPosts::CreateManual`.
 
+---
+
+## Maintainer TODOs
+
+1. **`import_scrape_results!`** — consider per-row import instead of one transaction; collect failures for retry or user feedback.
+2. **Scheduled searches** — cron/hourly job to find `JobSearch` records whose `runtime` matches and enqueue `JobScraperJob`.
+3. **CSP** — move inline scripts (application board, analytics) to Stimulus and tighten `script-src`.
+4. **In-house discovery** — optional future: adapter pattern to reduce SerpAPI dependency (see prior design discussion).
