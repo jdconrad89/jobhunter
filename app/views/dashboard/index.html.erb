@@ -65,9 +65,34 @@
     <header class="dashboard-applications__header">
       <div>
         <h2 class="dashboard-applications__title">Recent Applications</h2>
-        <p class="dashboard-applications__subtitle">Track pipeline status on the application board.</p>
+        <% if @applications_total_count.positive? %>
+          <p class="dashboard-applications__subtitle">
+            Showing <%= @job_applications.size %> of <%= @applications_total_count %> applications.
+            Track pipeline status on the application board.
+          </p>
+        <% else %>
+          <p class="dashboard-applications__subtitle">Track pipeline status on the application board.</p>
+        <% end %>
       </div>
-      <%= link_to "Application Board", job_applications_path, class: "dashboard-page__cta dashboard-page__cta--secondary" %>
+      <div class="dashboard-applications__header-actions">
+        <% if @applications_total_count.positive? %>
+          <%= form_with url: dashboard_path, method: :get, local: true, class: "dashboard-applications__limit-form" do %>
+            <label for="applications_limit" class="dashboard-applications__limit-label">Show</label>
+            <select
+              name="applications_limit"
+              id="applications_limit"
+              class="dashboard-applications__limit-select"
+              onchange="this.form.requestSubmit()"
+            >
+              <% DashboardController::APPLICATION_LIMIT_OPTIONS.each do |limit| %>
+                <option value="<%= limit %>" <%= "selected" if limit == @applications_limit %>><%= limit %></option>
+              <% end %>
+            </select>
+            <span class="dashboard-applications__limit-suffix">recent</span>
+          <% end %>
+        <% end %>
+        <%= link_to "Application Board", job_applications_path, class: "dashboard-page__cta dashboard-page__cta--secondary" %>
+      </div>
     </header>
 
     <% if @job_applications.any? %>
