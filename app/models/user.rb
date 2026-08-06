@@ -2,6 +2,7 @@ class User < ApplicationRecord
   has_secure_password
   has_many :job_applications, dependent: :destroy
   has_many :job_searches, dependent: :destroy
+  has_many :resumes, dependent: :destroy
 
   validates :name, presence: true
   validates :email, presence: true, uniqueness: true, format: { with: URI::MailTo::EMAIL_REGEXP }

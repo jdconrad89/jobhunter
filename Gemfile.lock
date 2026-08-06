@@ -1,6 +1,7 @@
 GEM
   remote: https://rubygems.org/
   specs:
+    Ascii85 (2.0.1)
     actioncable (8.0.5)
       actionpack (= 8.0.5)
       activesupport (= 8.0.5)
@@ -74,6 +75,7 @@ GEM
       uri (>= 0.13.1)
     addressable (2.9.0)
       public_suffix (>= 2.0.2, < 8.0)
+    afm (1.0.0)
     ast (2.4.3)
     base64 (0.3.0)
     bcrypt (3.1.22)
@@ -105,6 +107,9 @@ GEM
       reline (>= 0.3.8)
     diff-lcs (1.6.2)
     docile (1.4.1)
+    docx (0.13.0)
+      nokogiri (~> 1.13, >= 1.13.0)
+      rubyzip (>= 2.0, < 4)
     dotenv (3.2.0)
     drb (2.2.3)
     ed25519 (1.4.0)
@@ -112,12 +117,22 @@ GEM
     erubi (1.13.1)
     et-orbi (1.4.0)
       tzinfo
+    event_stream_parser (1.0.0)
+    faraday (2.14.3)
+      faraday-net_http (>= 2.0, < 3.5)
+      json
+      logger
+    faraday-multipart (1.2.0)
+      multipart-post (~> 2.0)
+    faraday-net_http (3.4.4)
+      net-http (~> 0.5)
     fugit (1.12.2)
       et-orbi (~> 1.4)
       raabro (~> 1.4)
     globalid (1.4.0)
       activesupport (>= 6.1)
     google_search_results (2.2.0)
+    hashery (2.1.2)
     i18n (1.15.2)
       concurrent-ruby (~> 1.0)
     importmap-rails (2.2.3)
@@ -177,6 +192,9 @@ GEM
       drb (~> 2.0)
       prism (~> 1.5)
     msgpack (1.8.3)
+    multipart-post (2.4.1)
+    net-http (0.9.1)
+      uri (>= 0.11.1)
     net-imap (0.6.4.1)
       date
       net-protocol
@@ -213,6 +231,12 @@ GEM
     parser (3.3.11.1)
       ast (~> 2.4.1)
       racc
+    pdf-reader (2.15.1)
+      Ascii85 (>= 1.0, < 3.0, != 2.0.0)
+      afm (>= 0.2.1, < 2)
+      hashery (~> 2.0)
+      ruby-rc4
+      ttfunk
     pg (1.6.3)
     pg (1.6.3-aarch64-linux)
     pg (1.6.3-aarch64-linux-musl)
@@ -344,7 +368,12 @@ GEM
       rubocop (>= 1.72)
       rubocop-performance (>= 1.24)
       rubocop-rails (>= 2.30)
+    ruby-openai (8.3.0)
+      event_stream_parser (>= 0.3.0, < 2.0.0)
+      faraday (>= 1)
+      faraday-multipart (>= 1)
     ruby-progressbar (1.13.0)
+    ruby-rc4 (0.1.5)
     rubyzip (3.4.1)
     securerandom (0.4.1)
     selenium-webdriver (4.45.0)
@@ -398,6 +427,7 @@ GEM
     thruster (0.1.22-x86_64-linux)
     timeout (0.6.1)
     tsort (0.2.0)
+    ttfunk (1.7.0)
     turbo-rails (2.0.23)
       actionpack (>= 7.1.0)
       railties (>= 7.1.0)
@@ -439,12 +469,14 @@ DEPENDENCIES
   brakeman
   capybara
   debug
+  docx
   dotenv
   google_search_results
   importmap-rails
   jbuilder
   kamal
   kaminari
+  pdf-reader
   pg (>= 1.1)
   propshaft
   pry
@@ -455,6 +487,7 @@ DEPENDENCIES
   rails (~> 8.0.1)
   rspec-rails
   rubocop-rails-omakase
+  ruby-openai
   selenium-webdriver
   sidekiq
   simplecov

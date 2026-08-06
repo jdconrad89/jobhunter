@@ -50,6 +50,10 @@ gem "kaminari"
 gem "rack-attack"
 gem "rack-cors"
 
+gem "ruby-openai"
+gem "pdf-reader"
+gem "docx"
+
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri windows ]

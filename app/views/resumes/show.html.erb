@@ -1,0 +1,66 @@
+<% content_for :head do %>
+  <%= stylesheet_link_tag "resumes", "data-turbo-track": "reload" %>
+<% end %>
+
+<div class="resumes-show">
+  <div class="resumes-show__container">
+    <div class="resumes-show__header">
+      <h1><%= @resume.name %></h1>
+      <div class="resumes-show__meta">
+        <% if @resume.is_default? %>
+          <span class="resumes-show__badge">Default</span>
+        <% end %>
+        <span class="resumes-show__status"><%= resume_extraction_status_label(@resume) %></span>
+      </div>
+    </div>
+
+    <% if @resume.extraction_status_failed? && @resume.extraction_error.present? %>
+      <div class="resumes-show__error">
+        <%= @resume.extraction_error %>
+      </div>
+    <% end %>
+
+    <% if @resume.file.attached? %>
+      <section class="resumes-show__preview">
+        <div class="resumes-show__preview-header">
+          <h2>Resume file</h2>
+          <%= link_to "Download",
+                rails_blob_path(@resume.file, disposition: "attachment"),
+                class: "resumes-show__download",
+                target: "_blank",
+                rel: "noopener" %>
+        </div>
+
+        <% if @resume.pdf? %>
+          <iframe
+            class="resumes-show__pdf"
+            src="<%= rails_blob_path(@resume.file, disposition: "inline") %>"
+            title="<%= @resume.name %> PDF preview">
+          </iframe>
+        <% elsif @resume.plain_text_file? %>
+          <pre class="resumes-show__text-body"><%= @resume.file.download.force_encoding("UTF-8") %></pre>
+        <% else %>
+          <p class="resumes-show__preview-note">
+            Inline preview is available for PDF and plain text files.
+            <%= link_to "Download this file", rails_blob_path(@resume.file, disposition: "attachment"), target: "_blank", rel: "noopener" %>
+            to view it in its original format.
+          </p>
+        <% end %>
+      </section>
+    <% end %>
+
+    <% if @resume.extracted_text.present? %>
+      <details class="resumes-show__extracted">
+        <summary>Extracted text used for suggestions</summary>
+        <pre class="resumes-show__text-body"><%= @resume.extracted_text %></pre>
+      </details>
+    <% elsif @resume.extraction_status_pending? %>
+      <p class="resumes-show__pending">Text extraction is in progress. Refresh this page in a moment.</p>
+    <% end %>
+
+    <div class="resumes-show__actions">
+      <%= link_to "Back to Resumes", resumes_path, class: "resumes-show__back" %>
+      <%= button_to "Delete", resume_path(@resume), method: :delete, class: "resumes-show__delete", data: { turbo_confirm: "Delete this resume?" } %>
+    </div>
+  </div>
+</div>

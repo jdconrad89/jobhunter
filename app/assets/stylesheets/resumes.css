@@ -1,0 +1,261 @@
+.resumes-index,
+.resumes-new {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+}
+
+.resumes-show {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+}
+
+.resumes-index__header,
+.resumes-new__header,
+.resumes-show__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.resumes-index__header h1,
+.resumes-new__header h1,
+.resumes-show__header h1 {
+  margin: 0;
+  color: #0f172a;
+}
+
+.resumes-index__header p,
+.resumes-new__header p {
+  margin: 0.35rem 0 0;
+  color: #64748b;
+}
+
+.resumes-index__upload-btn,
+.resumes-new__submit {
+  border: none;
+  background: #0d9488;
+  color: #fff;
+  border-radius: 8px;
+  padding: 0.55rem 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.resumes-index__upload-btn:hover,
+.resumes-new__submit:hover {
+  background: #0f766e;
+}
+
+.resumes-index__list {
+  display: grid;
+  gap: 1rem;
+}
+
+.resumes-index__card {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+}
+
+.resumes-index__card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.resumes-index__card-header h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.resumes-index__title-link {
+  color: #0f172a;
+  text-decoration: none;
+}
+
+.resumes-index__badge,
+.resumes-show__badge {
+  background: #ccfbf1;
+  color: #0f766e;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+}
+
+.resumes-index__status,
+.resumes-show__status {
+  color: #64748b;
+  font-size: 0.9rem;
+  margin: 0 0 0.75rem;
+}
+
+.resumes-index__error,
+.resumes-show__error {
+  color: #991b1b;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.resumes-index__actions,
+.resumes-show__actions,
+.resumes-new__actions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.resumes-index__link,
+.resumes-show__back,
+.resumes-new__cancel {
+  color: #0d9488;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.resumes-index__delete,
+.resumes-show__delete {
+  border: none;
+  background: #fee2e2;
+  color: #991b1b;
+  border-radius: 8px;
+  padding: 0.45rem 0.75rem;
+  cursor: pointer;
+}
+
+.resumes-index__empty {
+  text-align: center;
+  padding: 2rem;
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  border-radius: 10px;
+}
+
+.resumes-new__container,
+.resumes-show__container {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.resumes-new__errors {
+  border: 1px solid #fecaca;
+  background: #fef2f2;
+  color: #991b1b;
+  border-radius: 8px;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.resumes-new__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 0.9rem;
+}
+
+.resumes-new__field label {
+  font-size: 0.85rem;
+  color: #334155;
+  font-weight: 600;
+}
+
+.resumes-new__field input[type="text"],
+.resumes-new__field input[type="file"] {
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 0.55rem 0.7rem;
+}
+
+.resumes-new__field--checkbox {
+  flex-direction: row;
+  align-items: center;
+}
+
+.resumes-show__text-body {
+  white-space: pre-wrap;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 1rem;
+  max-height: 400px;
+  overflow: auto;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.resumes-show__preview {
+  margin-bottom: 1.25rem;
+}
+
+.resumes-show__preview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.resumes-show__preview-header h2 {
+  margin: 0;
+  font-size: 1rem;
+  color: #0f172a;
+}
+
+.resumes-show__download {
+  color: #0d9488;
+  font-weight: 600;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.resumes-show__pdf {
+  width: 100%;
+  height: 75vh;
+  min-height: 480px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.resumes-show__preview-note {
+  color: #64748b;
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.resumes-show__extracted {
+  margin-bottom: 1.25rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  background: #f8fafc;
+}
+
+.resumes-show__extracted summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: #475569;
+  margin-bottom: 0.5rem;
+}
+
+.resumes-show__extracted[open] summary {
+  margin-bottom: 0.75rem;
+}
+
+.resumes-show__pending {
+  color: #64748b;
+}

@@ -9,7 +9,10 @@ Rails.application.routes.draw do
 
   resources :job_posts, only: [ :index, :show, :new, :create ] do
     resources :job_applications, only: [ :create ]
+    resource :resume_suggestion, only: [ :create, :show ], controller: "resume_suggestions"
   end
+
+  resources :resumes, only: [ :index, :new, :create, :show, :destroy ]
 
   resources :job_applications, only: [ :index, :show, :edit, :update ]
 

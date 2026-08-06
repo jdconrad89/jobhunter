@@ -5,6 +5,7 @@ class JobPost < ApplicationRecord
   belongs_to :company
   belongs_to :job_search
   has_many :job_applications, dependent: :destroy
+  has_many :resume_suggestions, dependent: :destroy
 
   validates :title, presence: true
   validates :website, presence: true

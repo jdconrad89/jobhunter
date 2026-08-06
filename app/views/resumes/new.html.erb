@@ -1,0 +1,45 @@
+<% content_for :head do %>
+  <%= stylesheet_link_tag "resumes", "data-turbo-track": "reload" %>
+<% end %>
+
+<div class="resumes-new">
+  <div class="resumes-new__container">
+    <div class="resumes-new__header">
+      <h1>Upload Resume</h1>
+      <p>Supported formats: PDF, DOCX, or plain text (max 5 MB).</p>
+    </div>
+
+    <% if @resume.errors.any? %>
+      <div class="resumes-new__errors">
+        <h2><%= pluralize(@resume.errors.count, "error") %> prevented saving:</h2>
+        <ul>
+          <% @resume.errors.full_messages.each do |message| %>
+            <li><%= message %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <%= form_with model: @resume, url: resumes_path, method: :post, local: true, html: { multipart: true }, class: "resumes-new__form" do |f| %>
+      <div class="resumes-new__field">
+        <%= f.label :name, "Resume name" %>
+        <%= f.text_field :name, placeholder: "e.g. Software Engineer – 2026", required: true %>
+      </div>
+
+      <div class="resumes-new__field">
+        <%= f.label :file, "Resume file" %>
+        <%= f.file_field :file, accept: ".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain", required: true %>
+      </div>
+
+      <div class="resumes-new__field resumes-new__field--checkbox">
+        <%= f.check_box :is_default %>
+        <%= f.label :is_default, "Set as default resume" %>
+      </div>
+
+      <div class="resumes-new__actions">
+        <%= link_to "Cancel", resumes_path, class: "resumes-new__cancel" %>
+        <%= f.submit "Upload Resume", class: "resumes-new__submit" %>
+      </div>
+    <% end %>
+  </div>
+</div>

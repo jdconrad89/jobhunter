@@ -1,0 +1,48 @@
+<% content_for :head do %>
+  <%= stylesheet_link_tag "resumes", "data-turbo-track": "reload" %>
+<% end %>
+
+<div class="resumes-index">
+  <div class="resumes-index__container">
+    <div class="resumes-index__header">
+      <div>
+        <h1>My Resumes</h1>
+        <p>Upload resume copies to get tailored suggestions for each job posting.</p>
+      </div>
+      <%= link_to "Upload Resume", new_resume_path, class: "resumes-index__upload-btn" %>
+    </div>
+
+    <% if @resumes.any? %>
+      <div class="resumes-index__list">
+        <% @resumes.each do |resume| %>
+          <article class="resumes-index__card">
+            <div class="resumes-index__card-header">
+              <h2><%= link_to resume.name, resume_path(resume), class: "resumes-index__title-link" %></h2>
+              <% if resume.is_default? %>
+                <span class="resumes-index__badge">Default</span>
+              <% end %>
+            </div>
+
+            <p class="resumes-index__status">
+              Status: <%= resume_extraction_status_label(resume) %>
+            </p>
+
+            <% if resume.extraction_status_failed? && resume.extraction_error.present? %>
+              <p class="resumes-index__error"><%= resume.extraction_error %></p>
+            <% end %>
+
+            <div class="resumes-index__actions">
+              <%= link_to "View", resume_path(resume), class: "resumes-index__link" %>
+              <%= button_to "Delete", resume_path(resume), method: :delete, class: "resumes-index__delete", data: { turbo_confirm: "Delete this resume?" } %>
+            </div>
+          </article>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="resumes-index__empty">
+        <p>No resumes uploaded yet.</p>
+        <%= link_to "Upload your first resume", new_resume_path, class: "resumes-index__upload-btn" %>
+      </div>
+    <% end %>
+  </div>
+</div>

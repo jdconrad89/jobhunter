@@ -10,11 +10,13 @@ RSpec.describe JobPost, type: :model do
       beta = create_company!(name: "Beta LLC")
 
       acme_post = create_job_post!(company: acme, job_search: job_search, title: "Engineer", website: "https://example.com/1", remote: true)
-      _beta_post = create_job_post!(company: beta, job_search: job_search, title: "Engineer", website: "https://example.com/2", remote: true)
+      beta_post = create_job_post!(company: beta, job_search: job_search, title: "Engineer", website: "https://example.com/2", remote: true)
 
       results = JobPost.filtered({ company: "acme" })
       expect(results).to include(acme_post)
       expect(results.map(&:company_id).uniq).to eq([ acme.id ])
+      expect(results).not_to include(beta_post)
+
     end
 
     it "filters by remote=true and remote=false" do

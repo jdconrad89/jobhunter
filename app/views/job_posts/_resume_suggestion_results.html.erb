@@ -1,0 +1,75 @@
+<% data = suggestion.suggestions.with_indifferent_access %>
+
+<div class="job-post-show__suggestion-results">
+  <% if data[:overall_match_score].present? %>
+    <p class="job-post-show__match-score">
+      Match score: <strong><%= data[:overall_match_score] %>%</strong>
+    </p>
+  <% end %>
+
+  <% if data[:summary_changes].present? %>
+    <div class="job-post-show__suggestion-section">
+      <h4>Summary Changes</h4>
+      <ul>
+        <% data[:summary_changes].each do |item| %>
+          <li><%= item %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <% if data[:skills_to_emphasize].present? %>
+    <div class="job-post-show__suggestion-section">
+      <h4>Skills to Emphasize</h4>
+      <ul>
+        <% data[:skills_to_emphasize].each do |item| %>
+          <li><%= item %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <% if data[:skills_missing_or_weak].present? %>
+    <div class="job-post-show__suggestion-section">
+      <h4>Skills Missing or Weak</h4>
+      <ul>
+        <% data[:skills_missing_or_weak].each do |item| %>
+          <li><%= item %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <% if data[:keywords_to_add].present? %>
+    <div class="job-post-show__suggestion-section">
+      <h4>Keywords to Add</h4>
+      <ul>
+        <% data[:keywords_to_add].each do |item| %>
+          <li><%= item %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <% if data[:bullet_rewrites].present? %>
+    <div class="job-post-show__suggestion-section">
+      <h4>Bullet Rewrites</h4>
+      <% data[:bullet_rewrites].each do |rewrite| %>
+        <article class="job-post-show__bullet-rewrite">
+          <% if rewrite[:section].present? %>
+            <p class="job-post-show__bullet-section"><%= rewrite[:section] %></p>
+          <% end %>
+          <% if rewrite[:original].present? %>
+            <p><strong>Original:</strong> <%= rewrite[:original] %></p>
+          <% end %>
+          <% if rewrite[:suggested].present? %>
+            <p><strong>Suggested:</strong> <%= rewrite[:suggested] %></p>
+          <% end %>
+          <% if rewrite[:rationale].present? %>
+            <p><strong>Why:</strong> <%= rewrite[:rationale] %></p>
+          <% end %>
+        </article>
+      <% end %>
+    </div>
+  <% end %>
+</div>

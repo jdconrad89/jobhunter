@@ -81,28 +81,37 @@
 </div>
 
 <script>
-  document.addEventListener("DOMContentLoaded", () => {
+  (() => {
+    const board = document.querySelector(".job-apps-board");
+    if (!board || board.dataset.boardInitialized === "true") return;
+    board.dataset.boardInitialized = "true";
+
     const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute("content");
     let draggedCard = null;
 
-    document.querySelectorAll(".job-app-card").forEach((card) => {
-      card.addEventListener("dragstart", () => {
-        if (card.dataset.dragDisabled === "true") return;
+    board.querySelectorAll(".job-app-card").forEach((card) => {
+      card.addEventListener("dragstart", (e) => {
+        if (card.dataset.dragDisabled === "true") {
+          e.preventDefault();
+          return;
+        }
+        e.dataTransfer.effectAllowed = "move";
+        e.dataTransfer.setData("text/plain", card.dataset.applicationId);
         draggedCard = card;
         card.classList.add("job-app-card--dragging");
-        document.querySelectorAll(".job-app-card").forEach((c) => {
+        board.querySelectorAll(".job-app-card").forEach((c) => {
           if (c !== card) c.classList.add("job-app-card--drop-through");
         });
       });
       card.addEventListener("dragend", () => {
         card.classList.remove("job-app-card--dragging");
-        document.querySelectorAll(".job-app-card").forEach((c) => {
+        board.querySelectorAll(".job-app-card").forEach((c) => {
           c.classList.remove("job-app-card--drop-through");
         });
       });
     });
 
-    document.querySelectorAll('[data-followup-checkbox="true"]').forEach((checkbox) => {
+    board.querySelectorAll('[data-followup-checkbox="true"]').forEach((checkbox) => {
       checkbox.addEventListener("pointerdown", (e) => {
         e.stopPropagation();
         const card = checkbox.closest(".job-app-card");
@@ -141,7 +150,7 @@
       });
     });
 
-    document.querySelectorAll(".job-apps-column__dropzone").forEach((zone) => {
+    board.querySelectorAll(".job-apps-column__dropzone").forEach((zone) => {
       zone.addEventListener("dragover", (e) => {
         e.preventDefault();
         zone.classList.add("job-apps-column__dropzone--over");
@@ -180,5 +189,5 @@
         }
       });
     });
-  });
+  })();
 </script>

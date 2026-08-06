@@ -9,6 +9,9 @@
       <%= link_to "Job Posts", job_posts_path %>
       <%= link_to "Analytics", analytics_path %>
       <%= link_to "Applications", job_applications_path %>
+      <% if resume_recommendations_enabled? %>
+        <%= link_to "Resumes", resumes_path %>
+      <% end %>
       <%= link_to "API Token", api_token_path %>
       <%= button_to "Logout", logout_path, method: :delete, class: "button-link" %>
     <% else %>

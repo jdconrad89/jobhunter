@@ -47,4 +47,23 @@ module ModelHelpers
       remote: remote
     )
   end
+
+  def attach_text_resume!(resume, content: "Experienced Ruby developer with Rails and PostgreSQL.")
+    resume.file.attach(
+      io: StringIO.new(content),
+      filename: "resume.txt",
+      content_type: "text/plain"
+    )
+  end
+
+  def create_resume!(user:, name: "Main Resume", extracted_text: nil, extraction_status: :pending, is_default: false)
+    resume = user.resumes.create!(
+      name: name,
+      extracted_text: extracted_text,
+      extraction_status: extraction_status,
+      is_default: is_default
+    )
+    attach_text_resume!(resume) unless extracted_text
+    resume
+  end
 end

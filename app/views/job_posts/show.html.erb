@@ -137,6 +137,10 @@
 
         <!-- Description -->
         <main class="job-post-show__main">
+          <% if resume_recommendations_enabled? %>
+            <%= render "job_posts/resume_suggestions" %>
+          <% end %>
+
           <div class="job-post-show__description">
             <h3 class="job-post-show__description-title">Job Description</h3>
             <div class="job-post-show__description-body">

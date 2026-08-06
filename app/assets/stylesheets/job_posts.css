@@ -863,3 +863,107 @@
 .job-posts-new__submit:hover {
   background: #0f766e;
 }
+
+/* Resume suggestions on job post show */
+.job-post-show__resume-suggestions {
+  margin-bottom: 2rem;
+  padding: 1.25rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+}
+
+.job-post-show__resume-empty {
+  color: #64748b;
+  margin: 0;
+}
+
+.job-post-show__resume-link {
+  color: #0d9488;
+  font-weight: 600;
+}
+
+.job-post-show__resume-form-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: flex-end;
+  margin-bottom: 1rem;
+}
+
+.job-post-show__resume-form-row label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #334155;
+  width: 100%;
+}
+
+.job-post-show__resume-select {
+  flex: 1;
+  min-width: 200px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+}
+
+.job-post-show__resume-submit {
+  border: none;
+  background: #0d9488;
+  color: #fff;
+  border-radius: 8px;
+  padding: 0.5rem 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.job-post-show__resume-submit:disabled {
+  background: #94a3b8;
+  cursor: not-allowed;
+}
+
+.job-post-show__resume-status,
+.job-post-show__suggestion-pending {
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.job-post-show__suggestion-error {
+  border: 1px solid #fecaca;
+  background: #fef2f2;
+  color: #991b1b;
+  border-radius: 8px;
+  padding: 0.75rem;
+}
+
+.job-post-show__match-score {
+  font-size: 1rem;
+  margin: 0 0 1rem;
+}
+
+.job-post-show__suggestion-section {
+  margin-bottom: 1.25rem;
+}
+
+.job-post-show__suggestion-section h4 {
+  margin: 0 0 0.5rem;
+  color: #0f172a;
+  font-size: 0.95rem;
+}
+
+.job-post-show__suggestion-section ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  color: #334155;
+}
+
+.job-post-show__bullet-rewrite {
+  border-left: 3px solid #0d9488;
+  padding-left: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.job-post-show__bullet-section {
+  font-weight: 600;
+  color: #475569;
+  margin: 0 0 0.35rem;
+}

@@ -12,6 +12,7 @@ class JobPostsController < ApplicationController
   def show
     @suggested_job_posts = @job_post.suggested_jobs(limit: 4)
     @job_application = current_user.job_applications.find_by(job_post: @job_post)
+    load_resume_recommendation_context if resume_recommendations_enabled?
   end
 
   def new
@@ -56,5 +57,19 @@ class JobPostsController < ApplicationController
 
     allowed = [ 10, 20, 50 ]
     allowed.include?(per_page) ? per_page : 10
+  end
+
+  def load_resume_recommendation_context
+    @resumes = current_user.resumes.default_first
+    @selected_resume = selected_resume
+    @resume_suggestion = @selected_resume&.resume_suggestions&.find_by(job_post: @job_post)
+  end
+
+  def selected_resume
+    if params[:resume_id].present?
+      current_user.resumes.find_by(id: params[:resume_id])
+    else
+      current_user.resumes.find_by(is_default: true) || current_user.resumes.order(created_at: :desc).first
+    end
   end
 end

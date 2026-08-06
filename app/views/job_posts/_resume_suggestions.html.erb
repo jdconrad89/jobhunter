@@ -1,0 +1,53 @@
+<section class="job-post-show__resume-suggestions">
+  <h3 class="job-post-show__description-title">Resume Suggestions</h3>
+
+  <% if @resumes.empty? %>
+    <p class="job-post-show__resume-empty">
+      Upload a resume to get tailored suggestions for this job.
+      <%= link_to "Upload a resume", new_resume_path, class: "job-post-show__resume-link" %>
+    </p>
+  <% else %>
+    <%= form_with url: job_post_resume_suggestion_path(@job_post), method: :post, local: true, class: "job-post-show__resume-form" do %>
+      <div class="job-post-show__resume-form-row">
+        <label for="resume_id">Resume</label>
+        <%= select_tag :resume_id,
+              options_from_collection_for_select(@resumes, :id, :name, @selected_resume&.id),
+              id: "resume_id",
+              class: "job-post-show__resume-select",
+              onchange: "window.location = '#{job_post_path(@job_post)}?resume_id=' + this.value" %>
+        <%= submit_tag "Get Suggestions", class: "job-post-show__resume-submit", disabled: !@selected_resume&.text_ready? %>
+      </div>
+    <% end %>
+
+    <% if @selected_resume.present? && !@selected_resume.text_ready? %>
+      <p class="job-post-show__resume-status">
+        <%= resume_extraction_status_label(@selected_resume) %>
+        <% if @selected_resume.extraction_status_failed? && @selected_resume.extraction_error.present? %>
+          — <%= @selected_resume.extraction_error %>
+        <% end %>
+      </p>
+    <% end %>
+
+    <% if @resume_suggestion.present? %>
+      <% if @resume_suggestion.pending? %>
+        <div class="job-post-show__suggestion-pending"
+             data-controller="resume-suggestion-poll"
+             data-resume-suggestion-poll-url-value="<%= job_post_resume_suggestion_path(@job_post, resume_id: @selected_resume.id, format: :json) %>"
+             data-resume-suggestion-poll-max-attempts-value="40">
+          <p data-resume-suggestion-poll-target="status">
+            <%= @resume_suggestion.error_message.presence || resume_suggestion_status_label(@resume_suggestion) %>
+          </p>
+        </div>
+      <% elsif @resume_suggestion.failed? %>
+        <div class="job-post-show__suggestion-error">
+          <p><%= resume_suggestion_status_label(@resume_suggestion) %></p>
+          <% if @resume_suggestion.error_message.present? %>
+            <p><%= @resume_suggestion.error_message %></p>
+          <% end %>
+        </div>
+      <% elsif @resume_suggestion.completed? %>
+        <%= render "job_posts/resume_suggestion_results", suggestion: @resume_suggestion %>
+      <% end %>
+    <% end %>
+  <% end %>
+</section>
