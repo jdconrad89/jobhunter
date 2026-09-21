@@ -26,6 +26,8 @@ Rails.application.routes.draw do
   post "login", to: "sessions#create"
   delete "logout", to: "sessions#destroy"
 
+  resource :password_reset, only: [ :new, :create, :edit, :update ]
+
   resource :api_token, only: [ :show, :create ]
 
   namespace :api do

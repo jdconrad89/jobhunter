@@ -16,7 +16,6 @@ RSpec.describe JobPost, type: :model do
       expect(results).to include(acme_post)
       expect(results.map(&:company_id).uniq).to eq([ acme.id ])
       expect(results).not_to include(beta_post)
-
     end
 
     it "filters by remote=true and remote=false" do

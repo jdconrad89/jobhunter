@@ -1,0 +1,19 @@
+<div class="auth-container">
+  <div class="auth-box">
+    <h1>Reset your password</h1>
+    <p class="auth-subtitle">Enter your account email and we'll send reset instructions.</p>
+
+    <%= form_with url: password_reset_path, method: :post, local: true, class: "auth-form" do |f| %>
+      <div class="form-group">
+        <%= label_tag :email, "Email", class: "form-label" %>
+        <%= email_field_tag :email, params[:email], class: "form-input", required: true, autofocus: true %>
+      </div>
+
+      <%= f.submit "Send reset instructions", class: "form-submit" %>
+    <% end %>
+
+    <div class="auth-links">
+      <p><%= link_to "Back to log in", login_path, class: "auth-link" %></p>
+    </div>
+  </div>
+</div>

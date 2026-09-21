@@ -39,4 +39,20 @@ RSpec.describe User, type: :model do
     expect(User.authenticate_api_token(other_raw)).to eq(other)
     expect(User.authenticate_api_token("invalid")).to be_nil
   end
+
+  it "generates and validates password reset tokens" do
+    user = create_user!(email: "pwreset@example.com", password: "password")
+    raw_token = user.generate_token_for(:password_reset)
+
+    expect(User.find_by_token_for(:password_reset, raw_token)).to eq(user)
+    expect(User.find_by_token_for(:password_reset, "invalid")).to be_nil
+
+    travel 3.hours do
+      expect(User.find_by_token_for(:password_reset, raw_token)).to be_nil
+    end
+
+    fresh_token = user.generate_token_for(:password_reset)
+    user.update!(password: "changed1", password_confirmation: "changed1")
+    expect(User.find_by_token_for(:password_reset, fresh_token)).to be_nil
+  end
 end

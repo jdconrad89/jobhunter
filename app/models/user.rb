@@ -4,6 +4,12 @@ class User < ApplicationRecord
   has_many :job_searches, dependent: :destroy
   has_many :resumes, dependent: :destroy
 
+  # Signed, expiring tokens — no DB columns required (avoids stale-schema
+  # failures after migrate without a server restart).
+  generates_token_for :password_reset, expires_in: 2.hours do
+    password_digest
+  end
+
   validates :name, presence: true
   validates :email, presence: true, uniqueness: true, format: { with: URI::MailTo::EMAIL_REGEXP }
   validates :password, length: { minimum: 6 }, if: -> { new_record? || !password.nil? }
