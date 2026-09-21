@@ -91,7 +91,19 @@
 .form-helper-text {
   color: #6b7280;
   font-size: 0.875rem;
+  margin-top: 0.5rem;
   margin-bottom: 0.5rem;
+}
+
+.runtime-selects {
+  display: flex;
+  gap: 0.5rem;
+  align-items: stretch;
+}
+
+.runtime-selects__select {
+  flex: 1;
+  min-width: 0;
 }
 
 .remove-url-button {

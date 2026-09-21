@@ -5,19 +5,44 @@ RSpec.describe "JobSearches CRUD", type: :request do
     user = create_user!(email: "jscrud@example.com")
     sign_in_as(user)
 
-    post job_searches_path, params: { job_search: { job_title: "Ruby", location: "Anywhere", remote: true, language_code: "en", timezone: "UTC", board_relevance: [ "Indeed" ] } }
+    post job_searches_path, params: {
+      job_search: {
+        job_title: "Ruby",
+        location: "Anywhere",
+        remote: true,
+        language_code: "en",
+        timezone: JobSearch::DEFAULT_TIMEZONE,
+        runtime_hour: "9",
+        runtime_minute: "15",
+        runtime_meridiem: "AM",
+        board_relevance: [ "Indeed" ]
+      }
+    }
     expect(response).to redirect_to(dashboard_path)
 
     job_search = user.job_searches.order(created_at: :desc).first
     expect(job_search).to be_present
+    expect(job_search.runtime.hour).to eq(9)
+    expect(job_search.runtime.min).to eq(15)
 
     patch job_search_path(job_search), params: { job_search: { job_title: "Ruby 2" } }
     expect(response).to redirect_to(dashboard_path)
     expect(job_search.reload.job_title).to eq("Ruby 2")
+    expect(job_search.runtime.hour).to eq(9)
+
+    patch job_search_path(job_search), params: {
+      job_search: { runtime_hour: "2", runtime_minute: "30", runtime_meridiem: "PM" }
+    }
+    expect(response).to redirect_to(dashboard_path)
+    expect(job_search.reload.runtime.hour).to eq(14)
+    expect(job_search.runtime.min).to eq(30)
 
     get edit_job_search_path(job_search)
     expect(response).to have_http_status(:success)
     expect(response.body).to include("Edit Job Search")
+    expect(response.body).to include("runtime_hour")
+    expect(response.body).to include("runtime_minute")
+    expect(response.body).to include("runtime_meridiem")
 
     expect {
       post trigger_job_search_path(job_search)
@@ -36,7 +61,7 @@ RSpec.describe "JobSearches CRUD", type: :request do
     manual_search = create_job_search!(
       user: user,
       job_title: JobSearch::MANUAL_JOB_SEARCH_TITLE,
-      timezone: "UTC",
+      timezone: JobSearch::DEFAULT_TIMEZONE,
       board_relevance: []
     )
 
@@ -56,7 +81,7 @@ RSpec.describe "JobSearches CRUD", type: :request do
     manual_search = create_job_search!(
       user: user,
       job_title: JobSearch::MANUAL_JOB_SEARCH_TITLE,
-      timezone: "UTC",
+      timezone: JobSearch::DEFAULT_TIMEZONE,
       board_relevance: []
     )
 

@@ -33,13 +33,29 @@
 
   <div class="form-group">
     <%= f.label :runtime, "Daily Run Time", class: "form-label" %>
-    <%= f.time_field :runtime, class: "form-input" %>
+    <div class="runtime-selects">
+      <%= f.select :runtime_hour,
+          JobSearch::RUNTIME_HOURS.map { |h| [ h.to_s, h ] },
+          { include_blank: "Hour" },
+          { class: "form-input runtime-selects__select" } %>
+      <%= f.select :runtime_minute,
+          JobSearch::RUNTIME_MINUTES.map { |m| [ format("%02d", m), m ] },
+          { include_blank: "Min" },
+          { class: "form-input runtime-selects__select" } %>
+      <%= f.select :runtime_meridiem,
+          JobSearch::RUNTIME_MERIDIEMS.map { |m| [ m, m ] },
+          { include_blank: "AM/PM" },
+          { class: "form-input runtime-selects__select" } %>
+    </div>
+    <p class="form-helper-text">
+      Optional. Leave blank for no schedule. Searches run once per day at this time in the timezone below.
+    </p>
   </div>
 
   <div class="form-group">
     <%= f.label :timezone, class: "form-label" %>
     <%= f.select :timezone,
-        ActiveSupport::TimeZone.all.map { |tz| [tz.name, tz.name] },
+        JobSearch::US_TIMEZONES.map { |tz| [ tz, tz ] },
         { include_blank: "Select a timezone" },
         { class: "form-input" } %>
   </div>
@@ -120,7 +136,19 @@
   .form-helper-text {
     color: #6b7280;
     font-size: 0.875rem;
+    margin-top: 0.5rem;
     margin-bottom: 0.5rem;
+  }
+
+  .runtime-selects {
+    display: flex;
+    gap: 0.5rem;
+    align-items: stretch;
+  }
+
+  .runtime-selects__select {
+    flex: 1;
+    min-width: 0;
   }
 
   .remove-url-button {

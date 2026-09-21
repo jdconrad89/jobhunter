@@ -39,7 +39,7 @@ module JobPosts
     def manual_job_search
       @user.job_searches.find_or_create_by!(job_title: JobSearch::MANUAL_JOB_SEARCH_TITLE) do |job_search|
         job_search.language_code = "en"
-        job_search.timezone = Time.zone.name
+        job_search.timezone = JobSearch::US_TIMEZONES.include?(Time.zone.name) ? Time.zone.name : JobSearch::DEFAULT_TIMEZONE
         job_search.location = "Anywhere"
         job_search.remote = true
         job_search.number_of_jobs = 0 if job_search.respond_to?(:number_of_jobs=)

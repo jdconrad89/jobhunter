@@ -57,7 +57,11 @@ class JobSearchesController < ApplicationController
   end
 
   def job_search_params
-    permitted_params = params.require(:job_search).permit(:job_title, :location, :remote, :language_code, :runtime, :timezone, board_relevance: [])
+    permitted_params = params.require(:job_search).permit(
+      :job_title, :location, :remote, :language_code, :timezone,
+      :runtime_hour, :runtime_minute, :runtime_meridiem,
+      board_relevance: []
+    )
     permitted_params[:board_relevance] = permitted_params[:board_relevance].reject(&:blank?) if permitted_params[:board_relevance].present?
     permitted_params
   end

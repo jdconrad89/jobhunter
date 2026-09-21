@@ -12,7 +12,7 @@ module ModelHelpers
     Company.create!(name: name)
   end
 
-  def create_job_search!(user:, job_title: "Ruby Engineer", timezone: "UTC", language_code: "en", remote: true, location: "Anywhere", board_relevance: [])
+  def create_job_search!(user:, job_title: "Ruby Engineer", timezone: JobSearch::DEFAULT_TIMEZONE, language_code: "en", remote: true, location: "Anywhere", board_relevance: [], runtime: nil)
     JobSearch.create!(
       user: user,
       job_title: job_title,
@@ -20,7 +20,8 @@ module ModelHelpers
       remote: remote,
       language_code: language_code,
       board_relevance: board_relevance,
-      timezone: timezone
+      timezone: timezone,
+      runtime: runtime
     )
   end
 

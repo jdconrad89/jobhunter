@@ -4,7 +4,7 @@ A Rails application for **discovering job listings**, **browsing and filtering**
 
 Listings come from three paths:
 
-1. **Automated searches** — SerpAPI’s Google Jobs engine, triggered manually from the dashboard (scheduled runs are not implemented yet).
+1. **Automated searches** — SerpAPI’s Google Jobs engine, triggered manually from the dashboard or on a daily schedule via `ScheduleJobSearchesJob`.
 2. **Manual web entry** — add a job from the Job Posts UI.
 3. **Chrome extension** — scrape a job page in the browser and `POST` it to the API.
 
@@ -152,8 +152,8 @@ flowchart LR
 
 One configured scrape (or the synthetic manual bucket):
 
-- `job_title`, optional `location`, `remote`, `language_code`, `timezone`.
-- `runtime` — time-of-day stored on the record (scheduling not wired up yet).
+- `job_title`, optional `location`, `remote`, `language_code`, `timezone` (US zones only for now; see maintainer TODOs).
+- `runtime` — optional daily run time (must be on a 15-minute mark); matched in the search’s `timezone` by `ScheduleJobSearchesJob`.
 - `board_relevance` — ordered job board names from Google Jobs apply options (e.g. `LinkedIn`, `Indeed`); used to pick preferred apply URLs.
 - `number_of_jobs` — cached count; updated via `JobPost` callbacks.
 - `manual?` — true for the **“Manual Job Entries”** search; cannot be edited, deleted, or triggered.
@@ -193,6 +193,11 @@ One configured scrape (or the synthetic manual bucket):
 ---
 
 ## Jobs
+
+### `ScheduleJobSearchesJob` (`app/jobs/schedule_job_searches_job.rb`)
+
+- Runs every 15 minutes via Solid Queue recurring tasks (`config/recurring.yml`).
+- Finds non-manual `JobSearch` records whose `runtime` matches the current 15-minute slot in each search’s timezone, then enqueues `JobScraperJob` for each.
 
 ### `JobScraperJob` (`app/jobs/job_scraper_job.rb`)
 
@@ -308,6 +313,6 @@ SimpleCov enforces ~90% line coverage when the full suite runs locally.
 ## Maintainer TODOs
 
 1. **`import_scrape_results!`** — consider per-row import instead of one transaction; collect failures for retry or user feedback.
-2. **Scheduled searches** — cron/hourly job to find `JobSearch` records whose `runtime` matches and enqueue `JobScraperJob`.
-3. **CSP** — move inline scripts (application board, analytics) to Stimulus and tighten `script-src`.
-4. **In-house discovery** — optional future: adapter pattern to reduce SerpAPI dependency (see prior design discussion).
+2. **CSP** — move inline scripts (application board, analytics) to Stimulus and tighten `script-src`.
+3. **In-house discovery** — optional future: adapter pattern to reduce SerpAPI dependency (see prior design discussion).
+4. **Non-US timezones** — `JobSearch` currently limits `timezone` to a curated US list (`US_TIMEZONES`); expand when broader support is needed.

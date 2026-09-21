@@ -17,7 +17,7 @@ RSpec.describe "Dashboard", type: :request do
     user = create_user!(email: "dash-limit@example.com")
     sign_in_as(user)
     company = Company.create!(name: "Acme")
-    job_search = user.job_searches.create!(job_title: "Ruby", language_code: "en", timezone: "UTC")
+    job_search = user.job_searches.create!(job_title: "Ruby", language_code: "en", timezone: JobSearch::DEFAULT_TIMEZONE)
 
     12.times do |i|
       post = JobPost.create!(
